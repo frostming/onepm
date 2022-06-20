@@ -13,6 +13,20 @@ Supported package managers: [pip], [pipenv], [poetry], [pdm]
 [poetry]: https://pypi.org/project/poetry/
 [pdm]: https://pypi.org/project/pdm/
 
+## Install onepm
+
+Install with `pipx`:
+
+```
+pipx install onepm
+```
+
+Or use pdm global install:
+
+```
+pdm add -g onepm
+```
+
 ## Provided Shortcuts
 
 ### `pi` - install
