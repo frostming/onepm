@@ -1,0 +1,38 @@
+[project]
+name = "onepm"
+version = "0.1.0"
+description = "Picks the right package manager for you"
+authors = [
+    {name = "Frost Ming", email = "mianghong@gmail.com"},
+]
+dependencies = [
+    "tomli>=2.0.1; python_version < \"3.11\"",
+]
+requires-python = ">=3.7"
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3。10",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+[project.urls]
+Homepage = "https://github.com/frostming/onepm"
+Changelog = "https://github.com/frostming/onepm/releases"
+
+[project.scripts]
+pi = "onepm:pi"
+pu = "onepm:pu"
+pr = "onepm:pr"
+pun = "onepm:pun"
+pa = "onepm:pa"
+
+[tool.pdm]
+
+[build-system]
+requires = ["pdm-pep517>=0.12.0"]
+build-backend = "pdm.pep517.api"
