@@ -3,17 +3,17 @@ import os
 import shutil
 import subprocess
 import sys
-from typing import List, NoReturn
+from typing import Iterable, List, NoReturn
 
 
 class PackageManager(metaclass=abc.ABCMeta):
     name: str
 
     @staticmethod
-    def has_unknown_args(args: List[str], expecting_values: List[str]) -> bool:
+    def has_unknown_args(args: Iterable[str], expecting_values: List[str]) -> bool:
         args_iter = iter(args)
 
-        for arg in args:
+        for arg in args_iter:
             if arg[:2] == "--":
                 arg_name = arg[2:]
                 if arg_name in expecting_values:
@@ -37,8 +37,8 @@ class PackageManager(metaclass=abc.ABCMeta):
             raise Exception(f"{name} is not found in PATH, did you install it?")
         return executable
 
-    def execute_command(self, args: List[str]) -> NoReturn:
-        command_args = self.command + args
+    def execute_command(self, *args: str) -> NoReturn:
+        command_args = self.command + list(args)
         if sys.platform == "win32":
             sys.exit(subprocess.run(command_args).returncode)
         else:
@@ -49,17 +49,17 @@ class PackageManager(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def install(self, args: List[str]) -> NoReturn:
+    def install(self, *args: str) -> NoReturn:
         pass
 
     @abc.abstractmethod
-    def uninstall(self, args: List[str]) -> NoReturn:
+    def uninstall(self, *args: str) -> NoReturn:
         pass
 
     @abc.abstractmethod
-    def update(self, args: List[str]) -> NoReturn:
+    def update(self, *args: str) -> NoReturn:
         pass
 
     @abc.abstractmethod
-    def run(self, args: List[str]) -> NoReturn:
+    def run(self, *args: str) -> NoReturn:
         pass

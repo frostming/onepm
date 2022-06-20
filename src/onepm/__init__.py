@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Callable, Dict, NoReturn, Type
+from typing import Callable, Dict, List, NoReturn, Optional, Type
 
 from onepm.base import PackageManager
 from onepm.pdm import PDM
@@ -38,10 +38,12 @@ def determine_package_manager() -> str:
     return "pip"
 
 
-def make_shortcut(method_name: str) -> Callable[[], NoReturn]:
-    def main() -> NoReturn:
+def make_shortcut(method_name: str) -> Callable[[Optional[List[str]]], NoReturn]:
+    def main(args: Optional[List[str]] = None) -> NoReturn:
+        if args is None:
+            args = sys.argv[1:]
         package_manager = PACKAGE_MANAGERS[determine_package_manager()]()
-        getattr(package_manager, method_name)(sys.argv[1:])
+        getattr(package_manager, method_name)(*args)
 
     return main
 

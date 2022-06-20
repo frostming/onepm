@@ -38,29 +38,28 @@ class Pip(PackageManager):
         bin_dir = "Scripts" if sys.platform == "win32" else "bin"
         return [os.path.join(venv, bin_dir, "python"), "-m", "pip"]
 
-    def install(self, args: List[str]) -> NoReturn:
+    def install(self, *args: str) -> NoReturn:
         if not args:
             requirements = self._find_requirements_txt()
             setup_py = self._find_setup_py()
             if requirements:
-                args = ["install", "-r", requirements]
+                expanded_args = ["install", "-r", requirements]
             elif setup_py:
-                args = ["install", "."]
+                expanded_args = ["install", "."]
             else:
                 raise Exception(
                     "No requirements.txt or setup.py/pyproject.toml is found, "
                     "please specify packages to install."
                 )
         else:
-            args = ["install"] + list(args)
-        self.execute_command(args)
+            expanded_args = ["install"] + list(args)
+        self.execute_command(*expanded_args)
 
-    def update(self, args: List[str]) -> NoReturn:
+    def update(self, *args: str) -> NoReturn:
         raise NotImplementedError("pip does not support the `pu` shortcut.")
 
-    def uninstall(self, args: List[str]) -> NoReturn:
-        args = ["uninstall"] + list(args)
-        self.execute_command(args)
+    def uninstall(self, *args: str) -> NoReturn:
+        self.execute_command("uninstall", *args)
 
-    def run(self, args: List[str]) -> NoReturn:
-        self.execute_command(list(args))
+    def run(self, *args: str) -> NoReturn:
+        self.execute_command(*args)

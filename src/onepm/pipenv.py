@@ -9,14 +9,14 @@ class Pipenv(PackageManager):
     def get_command(self) -> List[str]:
         return [self.find_executable(self.name)]
 
-    def install(self, args: List[str]) -> NoReturn:
-        self.execute_command(["install"] + list(args))
+    def install(self, *args: str) -> NoReturn:
+        self.execute_command("install", *args)
 
-    def uninstall(self, args: List[str]) -> NoReturn:
-        self.execute_command(["uninstall"] + list(args))
+    def uninstall(self, *args: str) -> NoReturn:
+        self.execute_command("uninstall", *args)
 
-    def update(self, args: List[str]) -> NoReturn:
-        self.execute_command(["update"] + list(args))
+    def update(self, *args: str) -> NoReturn:
+        self.execute_command("update", *args)
 
-    def run(self, args: List[str]) -> NoReturn:
-        self.execute_command(["run"] + list(args))
+    def run(self, *args: str) -> NoReturn:
+        self.execute_command("run", *args)
