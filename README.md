@@ -17,13 +17,13 @@ Supported package managers: [pip], [pipenv], [poetry], [pdm]
 
 Install with `pipx`:
 
-```
+```bash
 pipx install onepm
 ```
 
 Or use pdm global install:
 
-```
+```bash
 pdm add -g onepm
 ```
 
@@ -31,16 +31,16 @@ pdm add -g onepm
 
 ### `pi` - install
 
-```
+```bash
 pi
 
 # (venv) pip install . or pip install -r requirements.txt
 # pipenv install
-# poetry add
-# pdm add
+# poetry install
+# pdm install
 ```
 
-```
+```bash
 pi requests
 
 # (venv) pip install requests
@@ -51,7 +51,7 @@ pi requests
 
 ### `pu` - update
 
-```
+```bash
 pu
 
 # not available for pip
@@ -62,18 +62,18 @@ pu
 
 ### `pr` - run
 
-```
-pr command ...args
+```bash
+pr ...args
 
-# (venv) command ...args
-# pipenv run command ...args
-# poetry run command ...args
-# pdm run command ...args
+# (venv) ...args
+# pipenv run ...args
+# poetry run ...args
+# pdm run ...args
 ```
 
 ### `pun` - uninstall
 
-```
+```bash
 pun requests
 
 # pip uninstall requests
@@ -84,7 +84,7 @@ pun requests
 
 ### `pa` - Alias for the package manager
 
-```
+```bash
 pa
 
 # pip
