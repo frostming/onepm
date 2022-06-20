@@ -37,12 +37,16 @@ class PackageManager(metaclass=abc.ABCMeta):
             raise Exception(f"{name} is not found in PATH, did you install it?")
         return executable
 
-    def execute_command(self, *args: str) -> NoReturn:
+    def execute(self, *args: str) -> NoReturn:
         command_args = self.command + list(args)
+        self._execute_command(command_args)
+
+    @staticmethod
+    def _execute_command(args: List[str]) -> NoReturn:
         if sys.platform == "win32":
-            sys.exit(subprocess.run(command_args).returncode)
+            sys.exit(subprocess.run(args).returncode)
         else:
-            os.execvp(command_args[0], command_args)
+            os.execvp(args[0], args)
 
     @abc.abstractmethod
     def get_command(self) -> List[str]:

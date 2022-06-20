@@ -20,17 +20,18 @@ PACKAGE_MANAGERS: Dict[str, Type[PackageManager]] = {
 
 
 def determine_package_manager() -> str:
-    pyproject_file = "pyproject.toml"
-    if not os.path.exists(pyproject_file):
-        return "pip"
-    with open(pyproject_file, "rb") as f:
-        pyproject_data = tomllib.load(f)
     if os.path.exists("pdm.lock"):
         return "pdm"
     if os.path.exists("poetry.lock"):
         return "poetry"
     if os.path.exists("Pipfile.lock") or os.path.exists("Pipfile"):
         return "pipenv"
+
+    pyproject_file = "pyproject.toml"
+    if not os.path.exists(pyproject_file):
+        return "pip"
+    with open(pyproject_file, "rb") as f:
+        pyproject_data = tomllib.load(f)
     if "pdm" in pyproject_data.get("tool", {}):
         return "pdm"
     if "poetry" in pyproject_data.get("tool", {}):
@@ -52,4 +53,4 @@ pi = make_shortcut("install")
 pu = make_shortcut("update")
 pun = make_shortcut("uninstall")
 pr = make_shortcut("run")
-pa = make_shortcut("execute_command")
+pa = make_shortcut("execute")

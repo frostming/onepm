@@ -14,13 +14,13 @@ class PDM(PackageManager):
             command = "add"
         else:
             command = "install"
-        self.execute_command(command, *args)
+        self.execute(command, *args)
 
     def uninstall(self, *args: str) -> NoReturn:
-        self.execute_command("remove", *args)
+        self.execute("remove", *args)
 
     def update(self, *args: str) -> NoReturn:
-        self.execute_command("update", *args)
+        self.execute("update", *args)
 
     def run(self, *args: str) -> NoReturn:
-        self.execute_command("run", *args)
+        self.execute("run", *args)

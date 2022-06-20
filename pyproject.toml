@@ -31,8 +31,13 @@ pr = "onepm:pr"
 pun = "onepm:pun"
 pa = "onepm:pa"
 
+[project.optional-dependencies]
 [tool.pdm]
 version = {use_scm = true}
+[tool.pdm.dev-dependencies]
+test = [
+    "pytest>=7.1.2",
+]
 
 [build-system]
 requires = ["pdm-pep517>=0.12.0"]

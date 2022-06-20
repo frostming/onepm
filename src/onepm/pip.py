@@ -1,9 +1,8 @@
 import os
 import sys
-from typing import NoReturn, Optional
+from typing import NoReturn, Optional, List
 
 from onepm.base import PackageManager
-from pip import List
 
 
 class Pip(PackageManager):
@@ -35,8 +34,13 @@ class Pip(PackageManager):
 
     def get_command(self) -> List[str]:
         venv = self._ensure_virtualenv()
-        bin_dir = "Scripts" if sys.platform == "win32" else "bin"
-        return [os.path.join(venv, bin_dir, "python"), "-m", "pip"]
+        if sys.platform == "win32":
+            bin_dir = "Scripts"
+            exe = ".exe"
+        else:
+            bin_dir = "bin"
+            exe = ""
+        return [os.path.join(venv, bin_dir, f"python{exe}"), "-m", "pip"]
 
     def install(self, *args: str) -> NoReturn:
         if not args:
@@ -53,13 +57,13 @@ class Pip(PackageManager):
                 )
         else:
             expanded_args = ["install"] + list(args)
-        self.execute_command(*expanded_args)
+        self.execute(*expanded_args)
 
     def update(self, *args: str) -> NoReturn:
         raise NotImplementedError("pip does not support the `pu` shortcut.")
 
     def uninstall(self, *args: str) -> NoReturn:
-        self.execute_command("uninstall", *args)
+        self.execute("uninstall", *args)
 
     def run(self, *args: str) -> NoReturn:
-        self.execute_command(*args)
+        self._execute_command(list(args))
