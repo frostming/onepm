@@ -10,7 +10,11 @@ class PDM(PackageManager):
         return [self.find_executable(self.name)]
 
     def install(self, args: List[str]) -> NoReturn:
-        self.execute_command(["add"] + list(args))
+        if self.has_unknown_args(args, ["p", "project", "G", "group", "L", "lockfile"]):
+            command = "add"
+        else:
+            command = "install"
+        self.execute_command([command] + list(args))
 
     def uninstall(self, args: List[str]) -> NoReturn:
         self.execute_command(["remove"] + list(args))

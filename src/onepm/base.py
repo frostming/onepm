@@ -9,6 +9,23 @@ from typing import List, NoReturn
 class PackageManager(metaclass=abc.ABCMeta):
     name: str
 
+    @staticmethod
+    def has_unknown_args(args: List[str], expecting_values: List[str]) -> bool:
+        args_iter = iter(args)
+
+        for arg in args:
+            if arg[:2] == "--":
+                arg_name = arg[2:]
+                if arg_name in expecting_values:
+                    next(args_iter, None)
+            elif arg[0] == "-":
+                arg_name = arg[1:]
+                if arg_name in expecting_values:
+                    next(args_iter, None)
+            else:
+                return True
+        return False
+
     def __init__(self) -> None:
         self.command = self.get_command()
 
