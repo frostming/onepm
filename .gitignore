@@ -1,3 +1,6 @@
 *.py[cod]
 __pycache__/
 .pdm.toml
+dist/
+build/
+*.egg-info/
