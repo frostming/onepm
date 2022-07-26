@@ -32,9 +32,10 @@ def determine_package_manager() -> str:
         return "pip"
     with open(pyproject_file, "rb") as f:
         pyproject_data = tomllib.load(f)
-    if "pdm" in pyproject_data.get("tool", {}):
+    build_backend = pyproject_data.get("build-system", {}).get("build-backend", "")
+    if "pdm" in pyproject_data.get("tool", {}) or "pdm" in build_backend:
         return "pdm"
-    if "poetry" in pyproject_data.get("tool", {}):
+    if "poetry" in pyproject_data.get("tool", {}) or "poetry" in build_backend:
         return "poetry"
     return "pip"
 

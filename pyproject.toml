@@ -31,9 +31,9 @@ pr = "onepm:pr"
 pun = "onepm:pun"
 pa = "onepm:pa"
 
-[project.optional-dependencies]
 [tool.pdm]
-version = {use_scm = true}
+version = {source = "scm"}
+
 [tool.pdm.dev-dependencies]
 test = [
     "pytest>=7.1.2",
