@@ -40,5 +40,5 @@ test = [
 ]
 
 [build-system]
-requires = ["pdm-pep517>=0.12.0"]
-build-backend = "pdm.pep517.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

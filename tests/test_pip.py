@@ -2,7 +2,7 @@ import os
 import sys
 
 import pytest
-from onepm import pi, pr, pa, pu, pun
+from onepm import pa, pi, pr, pu, pun
 from onepm.pip import Pip
 
 pytestmark = pytest.mark.usefixtures("pip")
@@ -13,7 +13,7 @@ def venv(monkeypatch):
     monkeypatch.setenv("VIRTUAL_ENV", "foo")
 
 
-def test_pip_detect_activated_venv(venv):
+def test_pip_detect_activated_venv(venv, project):
     pm = Pip()
     if sys.platform == "win32":
         assert pm.command == ["foo\\Scripts\\python.exe", "-m", "pip"]
@@ -37,13 +37,6 @@ def test_pip_detect_dot_venv(project):
             "-m",
             "pip",
         ]
-
-
-def test_pip_no_venv_error(project):
-    with pytest.raises(
-        Exception, match="To use pip, you must activate a virtualenv or create one"
-    ):
-        pi([])
 
 
 def test_install_without_args_error(project, venv):

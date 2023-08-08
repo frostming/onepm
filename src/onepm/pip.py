@@ -9,13 +9,13 @@ class Pip(PackageManager):
     name = "pip"
 
     def _ensure_virtualenv(self) -> str:
-        if "VIRTUAL_ENV" in os.environ:
-            return os.environ["VIRTUAL_ENV"]
         this_venv = os.path.abspath(".venv")
         if os.path.exists(this_venv) and os.path.exists(
             os.path.join(this_venv, "pyvenv.cfg")
         ):
             return this_venv
+        if "VIRTUAL_ENV" in os.environ:
+            return os.environ["VIRTUAL_ENV"]
 
         try:
             import venv
