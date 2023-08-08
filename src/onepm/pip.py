@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import NoReturn, Optional, List
+from typing import List, NoReturn, Optional
 
 from onepm.base import PackageManager
 
@@ -16,9 +16,15 @@ class Pip(PackageManager):
             os.path.join(this_venv, "pyvenv.cfg")
         ):
             return this_venv
-        raise Exception(
-            "To use pip, you must activate a virtualenv or create one at `.venv`."
-        )
+
+        try:
+            import venv
+        except ImportError:
+            raise Exception(
+                "To use pip, you must activate a virtualenv or create one at `.venv`."
+            )
+        venv.create(this_venv, with_pip=True)
+        return this_venv
 
     def _find_requirements_txt(self) -> Optional[str]:
         for filename in ["requirements.txt", "requirements.in"]:
