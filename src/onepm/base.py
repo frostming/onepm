@@ -1,16 +1,18 @@
+from __future__ import annotations
+
 import abc
 import os
 import shutil
 import subprocess
 import sys
-from typing import Iterable, List, NoReturn
+from typing import Iterable, NoReturn
 
 
 class PackageManager(metaclass=abc.ABCMeta):
     name: str
 
     @staticmethod
-    def has_unknown_args(args: Iterable[str], expecting_values: List[str]) -> bool:
+    def has_unknown_args(args: Iterable[str], expecting_values: list[str]) -> bool:
         args_iter = iter(args)
 
         for arg in args_iter:
@@ -42,14 +44,14 @@ class PackageManager(metaclass=abc.ABCMeta):
         self._execute_command(command_args)
 
     @staticmethod
-    def _execute_command(args: List[str]) -> NoReturn:
+    def _execute_command(args: list[str]) -> NoReturn:
         if sys.platform == "win32":
             sys.exit(subprocess.run(args).returncode)
         else:
             os.execvp(args[0], args)
 
     @abc.abstractmethod
-    def get_command(self) -> List[str]:
+    def get_command(self) -> list[str]:
         pass
 
     @abc.abstractmethod

@@ -1,5 +1,6 @@
-from onepm import pi, pa, pu, pun, pr
 import pytest
+
+from onepm import pa, pi, pr, pu, pun
 
 pytestmark = pytest.mark.usefixtures("pdm")
 
@@ -17,7 +18,7 @@ pytestmark = pytest.mark.usefixtures("pdm")
 )
 def test_pdm_pi_dispatch(project, execute_args, args, expected_command):
     pi(args)
-    assert execute_args[1:] == [expected_command] + args
+    assert execute_args[1:] == [expected_command, *args]
 
 
 def test_pdm_pr(project, execute_args):

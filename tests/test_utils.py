@@ -1,4 +1,5 @@
 import pytest
+
 from onepm import determine_package_manager
 
 

@@ -7,17 +7,17 @@ authors = [
 dependencies = [
     "tomli>=2.0.1; python_version < \"3.11\"",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
 dynamic = ["version"]
 classifiers = [
+    "Topic :: Software Development :: Build Tools",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 
 [project.urls]
@@ -31,8 +31,8 @@ pr = "onepm:pr"
 pun = "onepm:pun"
 pa = "onepm:pa"
 
-[tool.pdm]
-version = {source = "scm"}
+[tool.pdm.version]
+source = "scm"
 
 [tool.pdm.dev-dependencies]
 test = [
@@ -42,3 +42,19 @@ test = [
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+extend-select = [
+  "I",    # isort
+  "B",    # flake8-bugbear
+  "C4",   # flake8-comprehensions
+  "RUF",  # ruff
+  "W",    # pycodestyle
+  "YTT",  # flake8-2020
+]
+
+[tool.ruff.isort]
+known-first-party = ["onepm"]

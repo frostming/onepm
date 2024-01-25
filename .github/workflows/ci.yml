@@ -11,19 +11,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10"]
+        python-version: ["3.10", "3.11", "3.12"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: pdm-project/setup-pdm@v3
+        uses: pdm-project/setup-pdm@v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: true
       - name: Install Dependencies
         run: |
-          pdm install -dGtest
+          pdm sync -dGtest
       - name: Run Tests
         run: |
           pdm run pytest -v tests
