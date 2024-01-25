@@ -3,6 +3,8 @@ from unittest import mock
 
 import pytest
 
+from onepm import PDM, Pip, Pipenv, Poetry
+
 
 @pytest.fixture()
 def execute_args(monkeypatch):
@@ -28,15 +30,13 @@ def project(tmp_path):
 
 @pytest.fixture()
 def pip(monkeypatch):
-    monkeypatch.setattr(
-        "onepm.determine_package_manager", mock.Mock(return_value="pip")
-    )
+    monkeypatch.setattr("onepm.determine_package_manager", mock.Mock(return_value=Pip))
 
 
 @pytest.fixture()
 def poetry(monkeypatch):
     monkeypatch.setattr(
-        "onepm.determine_package_manager", mock.Mock(return_value="poetry")
+        "onepm.determine_package_manager", mock.Mock(return_value=Poetry)
     )
     monkeypatch.setattr(
         "onepm.base.PackageManager.find_executable", mock.Mock(return_value="poetry")
@@ -46,7 +46,7 @@ def poetry(monkeypatch):
 @pytest.fixture()
 def pipenv(monkeypatch):
     monkeypatch.setattr(
-        "onepm.determine_package_manager", mock.Mock(return_value="pipenv")
+        "onepm.determine_package_manager", mock.Mock(return_value=Pipenv)
     )
     monkeypatch.setattr(
         "onepm.base.PackageManager.find_executable", mock.Mock(return_value="pipenv")
@@ -55,9 +55,7 @@ def pipenv(monkeypatch):
 
 @pytest.fixture()
 def pdm(monkeypatch):
-    monkeypatch.setattr(
-        "onepm.determine_package_manager", mock.Mock(return_value="pdm")
-    )
+    monkeypatch.setattr("onepm.determine_package_manager", mock.Mock(return_value=PDM))
     monkeypatch.setattr(
         "onepm.base.PackageManager.find_executable", mock.Mock(return_value="pdm")
     )

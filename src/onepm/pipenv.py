@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-from typing import NoReturn
+import os
+from typing import Any, NoReturn
 
 from onepm.base import PackageManager
 
 
 class Pipenv(PackageManager):
     name = "pipenv"
+
+    @classmethod
+    def matches(cls, pyproject: dict[str, Any]) -> bool:
+        return os.path.exists("Pipfile.lock") or os.path.exists("Pipfile")
 
     def get_command(self) -> list[str]:
         return [self.find_executable(self.name)]

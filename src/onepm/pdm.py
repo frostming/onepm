@@ -1,12 +1,22 @@
 from __future__ import annotations
 
-from typing import NoReturn
+import os
+from typing import Any, NoReturn
 
 from onepm.base import PackageManager
 
 
 class PDM(PackageManager):
     name = "pdm"
+
+    @classmethod
+    def matches(cls, pyproject: dict[str, Any]) -> bool:
+        if os.path.exists("pdm.lock"):
+            return True
+        build_backend = pyproject.get("build-system", {}).get("build-backend", "")
+        if "pdm" in build_backend:
+            return True
+        return "pdm" in pyproject.get("tool", {})
 
     def get_command(self) -> list[str]:
         return [self.find_executable(self.name)]

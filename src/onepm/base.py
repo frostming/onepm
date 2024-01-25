@@ -5,7 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
-from typing import Iterable, NoReturn
+from typing import Any, Iterable, NoReturn
 
 
 class PackageManager(metaclass=abc.ABCMeta):
@@ -68,4 +68,9 @@ class PackageManager(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def run(self, *args: str) -> NoReturn:
+        pass
+
+    @classmethod
+    @abc.abstractmethod
+    def matches(cls, pyproject: dict[str, Any]) -> bool:
         pass

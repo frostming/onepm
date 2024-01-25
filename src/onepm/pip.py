@@ -2,13 +2,18 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import NoReturn
+from typing import Any, NoReturn
 
 from onepm.base import PackageManager
 
 
 class Pip(PackageManager):
     name = "pip"
+
+    @classmethod
+    def matches(cls, pyproject: dict[str, Any]) -> bool:
+        """Fallback package manager, always matches."""
+        return True
 
     def _ensure_virtualenv(self) -> str:
         this_venv = os.path.abspath(".venv")

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-import os
 import sys
 from typing import Callable, NoReturn
+
+from packaging.requirements import Requirement
+from packaging.utils import canonicalize_name
 
 from onepm.base import PackageManager
 from onepm.pdm import PDM
@@ -18,36 +20,34 @@ else:
 
 PACKAGE_MANAGERS: dict[str, type[PackageManager]] = {
     p.name: p  # type: ignore[type-abstract]
-    for p in [Pip, Pipenv, Poetry, PDM]
+    for p in [Pipenv, PDM, Poetry, Pip]
 }
 
 
-def determine_package_manager() -> str:
-    if os.path.exists("pdm.lock"):
-        return "pdm"
-    if os.path.exists("poetry.lock"):
-        return "poetry"
-    if os.path.exists("Pipfile.lock") or os.path.exists("Pipfile"):
-        return "pipenv"
-
-    pyproject_file = "pyproject.toml"
-    if not os.path.exists(pyproject_file):
-        return "pip"
-    with open(pyproject_file, "rb") as f:
-        pyproject_data = tomllib.load(f)
-    build_backend = pyproject_data.get("build-system", {}).get("build-backend", "")
-    if "pdm" in pyproject_data.get("tool", {}) or "pdm" in build_backend:
-        return "pdm"
-    if "poetry" in pyproject_data.get("tool", {}) or "poetry" in build_backend:
-        return "poetry"
-    return "pip"
+def determine_package_manager() -> type[PackageManager]:
+    try:
+        with open("pyproject.toml", "rb") as f:
+            pyproject = tomllib.load(f)
+    except FileNotFoundError:
+        pyproject = {}
+    package_manager: str | None = (
+        pyproject.get("tool", {}).get("onepm", {}).get("package-manager")
+    )
+    if package_manager:
+        requirement = Requirement(package_manager)
+        if (name := canonicalize_name(requirement.name)) in PACKAGE_MANAGERS:
+            return PACKAGE_MANAGERS[name]
+    for pm in PACKAGE_MANAGERS.values():
+        if pm.matches(pyproject):
+            return pm
+    return Pip
 
 
 def make_shortcut(method_name: str) -> Callable[[list[str] | None], NoReturn]:
     def main(args: list[str] | None = None) -> NoReturn:  # type: ignore[misc]
         if args is None:
             args = sys.argv[1:]
-        package_manager = PACKAGE_MANAGERS[determine_package_manager()]()
+        package_manager = determine_package_manager()()
         getattr(package_manager, method_name)(*args)
 
     return main
