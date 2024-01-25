@@ -1,4 +1,6 @@
-from typing import List, NoReturn
+from __future__ import annotations
+
+from typing import NoReturn
 
 from onepm.base import PackageManager
 
@@ -6,7 +8,7 @@ from onepm.base import PackageManager
 class PDM(PackageManager):
     name = "pdm"
 
-    def get_command(self) -> List[str]:
+    def get_command(self) -> list[str]:
         return [self.find_executable(self.name)]
 
     def install(self, *args: str) -> NoReturn:

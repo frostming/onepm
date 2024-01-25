@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import sys
-from typing import Callable, Dict, List, NoReturn, Optional, Type
+from typing import Callable, NoReturn
 
 from onepm.base import PackageManager
 from onepm.pdm import PDM
@@ -14,8 +16,9 @@ else:
     import tomli as tomllib
 
 
-PACKAGE_MANAGERS: Dict[str, Type[PackageManager]] = {
-    p.name: p for p in [Pip, Pipenv, Poetry, PDM]
+PACKAGE_MANAGERS: dict[str, type[PackageManager]] = {
+    p.name: p  # type: ignore[type-abstract]
+    for p in [Pip, Pipenv, Poetry, PDM]
 }
 
 
@@ -40,8 +43,8 @@ def determine_package_manager() -> str:
     return "pip"
 
 
-def make_shortcut(method_name: str) -> Callable[[Optional[List[str]]], NoReturn]:
-    def main(args: Optional[List[str]] = None) -> NoReturn:
+def make_shortcut(method_name: str) -> Callable[[list[str] | None], NoReturn]:
+    def main(args: list[str] | None = None) -> NoReturn:  # type: ignore[misc]
         if args is None:
             args = sys.argv[1:]
         package_manager = PACKAGE_MANAGERS[determine_package_manager()]()

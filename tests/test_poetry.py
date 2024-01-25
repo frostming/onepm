@@ -1,4 +1,5 @@
 import pytest
+
 from onepm import pa, pi, pr, pu, pun
 
 pytestmark = pytest.mark.usefixtures("poetry")
@@ -16,7 +17,7 @@ pytestmark = pytest.mark.usefixtures("poetry")
 )
 def test_poetry_pi_dispatch(project, execute_args, args, expected_command):
     pi(args)
-    assert execute_args[1:] == [expected_command] + args
+    assert execute_args[1:] == [expected_command, *args]
 
 
 def test_poetry_pu(project, execute_args):

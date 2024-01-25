@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import sys
-from typing import List, NoReturn, Optional
+from typing import NoReturn
 
 from onepm.base import PackageManager
 
@@ -22,23 +24,23 @@ class Pip(PackageManager):
         except ImportError:
             raise Exception(
                 "To use pip, you must activate a virtualenv or create one at `.venv`."
-            )
+            ) from None
         venv.create(this_venv, with_pip=True)
         return this_venv
 
-    def _find_requirements_txt(self) -> Optional[str]:
+    def _find_requirements_txt(self) -> str | None:
         for filename in ["requirements.txt", "requirements.in"]:
             if os.path.exists(filename):
                 return filename
         return None
 
-    def _find_setup_py(self) -> Optional[str]:
+    def _find_setup_py(self) -> str | None:
         for filename in ["setup.py", "pyproject.toml"]:
             if os.path.exists(filename):
                 return filename
         return None
 
-    def get_command(self) -> List[str]:
+    def get_command(self) -> list[str]:
         venv = self._ensure_virtualenv()
         if sys.platform == "win32":
             bin_dir = "Scripts"
@@ -62,7 +64,7 @@ class Pip(PackageManager):
                     "please specify packages to install."
                 )
         else:
-            expanded_args = ["install"] + list(args)
+            expanded_args = ["install", *args]
         self.execute(*expanded_args)
 
     def update(self, *args: str) -> NoReturn:

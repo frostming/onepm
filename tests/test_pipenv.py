@@ -1,6 +1,6 @@
 import pytest
-from onepm import pi, pa, pu, pun, pr
 
+from onepm import pa, pi, pr, pu, pun
 
 pytestmark = pytest.mark.usefixtures("pipenv")
 
@@ -8,7 +8,7 @@ pytestmark = pytest.mark.usefixtures("pipenv")
 @pytest.mark.parametrize("args", [[], ["--dev"], ["--keep-outdated", "requests"]])
 def test_pipenv_pi(project, execute_args, args):
     pi(args)
-    assert execute_args[1:] == ["install"] + args
+    assert execute_args[1:] == ["install", *args]
 
 
 def test_pipenv_pr(project, execute_args):
