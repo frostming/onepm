@@ -7,17 +7,17 @@ authors = [
 dependencies = [
     "tomli>=2.0.1; python_version < \"3.11\"",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
 dynamic = ["version"]
 classifiers = [
+    "Topic :: Software Development :: Build Tools",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 
 [project.urls]
