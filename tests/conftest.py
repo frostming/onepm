@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from onepm import PDM, Pip, Pipenv, Poetry
+from onepm.core import PDM, Pip, Pipenv, Poetry
 
 
 @pytest.fixture()

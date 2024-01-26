@@ -5,8 +5,24 @@ import os
 import shutil
 import subprocess
 import sys
+from functools import lru_cache
 from pathlib import Path
-from typing import Any, Iterable, NoReturn
+from typing import TYPE_CHECKING, Any, Iterable, NoReturn
+
+from packaging.requirements import Requirement
+from packaging.version import Version
+
+if TYPE_CHECKING:
+    from onepm.core import OneManager
+
+
+@lru_cache(maxsize=1)
+def wrapper_enabled() -> bool:
+    try:
+        import unearth  # noqa: F401
+    except ModuleNotFoundError:
+        return False
+    return True
 
 
 class PackageManager(metaclass=abc.ABCMeta):
@@ -29,8 +45,8 @@ class PackageManager(metaclass=abc.ABCMeta):
                 return True
         return False
 
-    def __init__(self) -> None:
-        self.command = self.get_command()
+    def __init__(self, executable: str) -> None:
+        self.executable = executable
 
     @staticmethod
     def find_executable(name: str, path: str | Path | None = None) -> str:
@@ -41,7 +57,7 @@ class PackageManager(metaclass=abc.ABCMeta):
         return executable
 
     def execute(self, *args: str) -> NoReturn:
-        command_args = self.command + list(args)
+        command_args = self.get_command() + list(args)
         self._execute_command(command_args)
 
     @staticmethod
@@ -51,9 +67,8 @@ class PackageManager(metaclass=abc.ABCMeta):
         else:
             os.execvp(args[0], args)
 
-    @abc.abstractmethod
     def get_command(self) -> list[str]:
-        pass
+        return [self.executable]
 
     @abc.abstractmethod
     def install(self, *args: str) -> NoReturn:
@@ -75,3 +90,33 @@ class PackageManager(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def matches(cls, pyproject: dict[str, Any]) -> bool:
         pass
+
+    @classmethod
+    def get_executable_name(cls) -> str:
+        return cls.name
+
+    @classmethod
+    def ensure_executable(cls, core: OneManager, requirement: Requirement) -> str:
+        name = cls.get_executable_name()
+        if not wrapper_enabled():
+            # Find in PATH
+            return cls.find_executable(name)
+
+        versions = core.get_versions(cls.name)
+        best_match = max(
+            filter(requirement.specifier.contains, versions), default=None, key=Version
+        )
+        bin_dir = "Scripts" if sys.platform == "win32" else "bin"
+        if best_match is not None:
+            return str(core.package_dir(cls.name) / best_match / bin_dir / name)
+        return str(core.install_tool(cls.name, requirement) / bin_dir / name)
+
+    @staticmethod
+    def make_venv(venv_path: Path, with_pip: bool = True) -> Path:
+        if venv_path.exists() and venv_path.joinpath("pyvenv.cfg").exists():
+            return venv_path
+
+        import venv
+
+        venv.create(venv_path, with_pip=with_pip)
+        return venv_path

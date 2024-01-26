@@ -31,7 +31,14 @@ pu = "onepm:pu"
 pr = "onepm:pr"
 pun = "onepm:pun"
 pa = "onepm:pa"
+pdm = "onepm:pdm [all]"
+poetry = "onepm:poetry [all]"
+pipenv = "onepm:pipenv [all]"
 
+[project.optional-dependencies]
+all = [
+    "unearth>=0.14.0",
+]
 [tool.pdm.version]
 source = "scm"
 

@@ -3,7 +3,8 @@ import sys
 
 import pytest
 
-from onepm import Pip, pa, pi, pr, pu, pun
+from onepm import pa, pi, pr, pu, pun
+from onepm.core import Pip
 
 pytestmark = pytest.mark.usefixtures("pip")
 
