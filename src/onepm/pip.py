@@ -79,4 +79,13 @@ class Pip(PackageManager):
         self.execute("uninstall", *args)
 
     def run(self, *args: str) -> NoReturn:
-        self._execute_command(list(args))
+        if len(args) == 0:
+            raise Exception("Please specify a command to run.")
+        command, *rest = args
+        venv = self._ensure_virtualenv()
+        bin_dir = "Scripts" if sys.platform == "win32" else "bin"
+        path = os.getenv("PATH", "")
+        command = self.find_executable(
+            command, os.pathsep.join([os.path.join(venv, bin_dir), path])
+        )
+        self._execute_command([command, *rest])

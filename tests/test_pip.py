@@ -11,7 +11,14 @@ pytestmark = pytest.mark.usefixtures("pip")
 
 @pytest.fixture
 def venv(monkeypatch):
+    @staticmethod
+    def mock_find_executable(name: str, path: str | None = None) -> str:
+        return name
+
     monkeypatch.setenv("VIRTUAL_ENV", "foo")
+    monkeypatch.setattr(
+        "onepm.base.PackageManager.find_executable", mock_find_executable
+    )
 
 
 def test_pip_detect_activated_venv(venv, project):

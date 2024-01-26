@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any, Iterable, NoReturn
 
 
@@ -32,9 +33,9 @@ class PackageManager(metaclass=abc.ABCMeta):
         self.command = self.get_command()
 
     @staticmethod
-    def find_executable(name: str) -> str:
+    def find_executable(name: str, path: str | Path | None = None) -> str:
         # TODO: to keep it simple, only search in PATH(no alias/shell function)
-        executable = shutil.which(name)
+        executable = shutil.which(name, path=path)
         if not executable:
             raise Exception(f"{name} is not found in PATH, did you install it?")
         return executable
