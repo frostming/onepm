@@ -6,11 +6,11 @@ from typing import Callable, NoReturn
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
 
-from onepm.base import PackageManager
-from onepm.pdm import PDM
-from onepm.pip import Pip
-from onepm.pipenv import Pipenv
-from onepm.poetry import Poetry
+from onepm.pm.base import PackageManager
+from onepm.pm.pdm import PDM
+from onepm.pm.pip import Pip
+from onepm.pm.pipenv import Pipenv
+from onepm.pm.poetry import Poetry
 
 if sys.version_info >= (3, 11):
     import tomllib

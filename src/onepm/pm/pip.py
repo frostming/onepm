@@ -4,7 +4,7 @@ import os
 import sys
 from typing import Any, NoReturn
 
-from onepm.base import PackageManager
+from onepm.pm.base import PackageManager
 
 
 class Pip(PackageManager):

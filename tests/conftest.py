@@ -14,7 +14,7 @@ def execute_args(monkeypatch):
     def fake_execute(args):
         call_args[:] = args
 
-    monkeypatch.setattr("onepm.base.PackageManager._execute_command", fake_execute)
+    monkeypatch.setattr("onepm.pm.base.PackageManager._execute_command", fake_execute)
     return call_args
 
 
@@ -39,7 +39,7 @@ def poetry(monkeypatch):
         "onepm.determine_package_manager", mock.Mock(return_value=Poetry)
     )
     monkeypatch.setattr(
-        "onepm.base.PackageManager.find_executable", mock.Mock(return_value="poetry")
+        "onepm.pm.base.PackageManager.find_executable", mock.Mock(return_value="poetry")
     )
 
 
@@ -49,7 +49,7 @@ def pipenv(monkeypatch):
         "onepm.determine_package_manager", mock.Mock(return_value=Pipenv)
     )
     monkeypatch.setattr(
-        "onepm.base.PackageManager.find_executable", mock.Mock(return_value="pipenv")
+        "onepm.pm.base.PackageManager.find_executable", mock.Mock(return_value="pipenv")
     )
 
 
@@ -57,5 +57,5 @@ def pipenv(monkeypatch):
 def pdm(monkeypatch):
     monkeypatch.setattr("onepm.determine_package_manager", mock.Mock(return_value=PDM))
     monkeypatch.setattr(
-        "onepm.base.PackageManager.find_executable", mock.Mock(return_value="pdm")
+        "onepm.pm.base.PackageManager.find_executable", mock.Mock(return_value="pdm")
     )

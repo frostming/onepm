@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any, NoReturn
 
-from onepm.base import PackageManager
+from onepm.pm.base import PackageManager
 
 
 class Pipenv(PackageManager):

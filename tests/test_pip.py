@@ -3,8 +3,7 @@ import sys
 
 import pytest
 
-from onepm import pa, pi, pr, pu, pun
-from onepm.pip import Pip
+from onepm import Pip, pa, pi, pr, pu, pun
 
 pytestmark = pytest.mark.usefixtures("pip")
 
@@ -17,7 +16,7 @@ def venv(monkeypatch):
 
     monkeypatch.setenv("VIRTUAL_ENV", "foo")
     monkeypatch.setattr(
-        "onepm.base.PackageManager.find_executable", mock_find_executable
+        "onepm.pm.base.PackageManager.find_executable", mock_find_executable
     )
 
 
