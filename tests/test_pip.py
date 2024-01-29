@@ -25,7 +25,7 @@ def test_pip_detect_activated_venv(project, monkeypatch):
     pm = OneManager().get_package_manager()
     assert pm.name == "pip"
     if sys.platform == "win32":
-        assert pm.get_command() == ["foo\\Scripts\\python.exe", "-m", "pip"]
+        assert pm.get_command() == ["foo\\Scripts\\python.EXE", "-m", "pip"]
     else:
         assert pm.get_command() == ["foo/bin/python", "-m", "pip"]
 
@@ -39,7 +39,7 @@ def test_pip_detect_dot_venv(project, pre_create, monkeypatch):
     assert os.path.exists(".venv/pyvenv.cfg")
     assert pm.name == "pip"
     if sys.platform == "win32":
-        assert pm.get_command() == [".venv\\Scripts\\python.exe", "-m", "pip"]
+        assert pm.get_command() == [".venv\\Scripts\\python.EXE", "-m", "pip"]
     else:
         assert pm.get_command() == [".venv/bin/python", "-m", "pip"]
 
