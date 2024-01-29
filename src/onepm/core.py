@@ -4,7 +4,10 @@ import os
 import shutil
 import subprocess
 import sys
+import uuid
+from dataclasses import dataclass
 from functools import cached_property
+from importlib.metadata import Distribution
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -21,10 +24,7 @@ from onepm.pm.poetry import Poetry
 if TYPE_CHECKING:
     from unearth import PackageFinder
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
+import tomlkit
 
 PACKAGE_MANAGERS: dict[str, type[PackageManager]] = {
     p.name: p  # type: ignore[type-abstract]
@@ -44,7 +44,7 @@ class OneManager:
         self.index_url = index_url
         try:
             with open(self.path / "pyproject.toml", "rb") as f:
-                self.pyproject = tomllib.load(f)
+                self.pyproject = tomlkit.load(f)
         except FileNotFoundError:
             self.pyproject = {}
 
@@ -57,7 +57,9 @@ class OneManager:
         index_urls = [self.index_url] if self.index_url else []
         return unearth.PackageFinder(index_urls=index_urls)
 
-    def get_package_manager(self, specified: str | None = None) -> PackageManager:
+    def detect_package_manager(
+        self, specified: str | None = None
+    ) -> tuple[type[PackageManager], Requirement]:
         requested: str | None = (
             self.pyproject.get("tool", {}).get("onepm", {}).get("package-manager")
         )
@@ -83,43 +85,63 @@ class OneManager:
         assert package_manager is not None
         if requirement is None:
             requirement = Requirement(package_manager.name)
+        return package_manager, requirement
+
+    def get_package_manager(self, specified: str | None = None) -> PackageManager:
+        package_manager, requirement = self.detect_package_manager(specified)
         executable = str(package_manager.ensure_executable(self, requirement))
         return package_manager(executable)
 
-    def package_dir(self, package: str) -> Path:
-        return self._tool_dir / "venvs" / package
+    def package_dir(self, name: str) -> Path:
+        return self._tool_dir / "venvs" / name
 
-    def get_versions(self, name: str) -> list[str]:
-        package_manager_dir = self.package_dir(name)
-        if not package_manager_dir.exists():
+    def get_installations(self, name: str) -> list[Installation]:
+        venvs = self.package_dir(name)
+        if not venvs.exists():
             return []
-        return [d.name for d in package_manager_dir.iterdir() if d.is_dir()]
+        versions: list[Version] = []
+        for venv in venvs.iterdir():
+            candidate = next(
+                venv.glob(f"lib/**/site-packages/{name}-*.dist-info"), None
+            )
+            if candidate is None:
+                continue
+            versions.append(Installation(name, Distribution.at(candidate), venv))
+        return sorted(versions, key=lambda i: i.version, reverse=True)
 
-    def cleanup(self, package: str) -> None:
-        package_dir = self.package_dir(package)
+    def cleanup(self, name: str | None) -> None:
+        if name is None:
+            shutil.rmtree(self._tool_dir / "venvs", ignore_errors=True)
+            return
+        package_dir = self.package_dir(name)
         if package_dir.exists():
             shutil.rmtree(package_dir)
 
-    def install_tool(self, package: str, requirement: Requirement) -> Path:
+    def install_tool(self, name: str, requirement: Requirement) -> Installation:
         best_match = self.package_finder.find_best_match(requirement).best
         if best_match is None:
             raise Exception(f"Cannot find package matching requirement {requirement}")
-        version = best_match.version
-        assert version is not None
-        version = str(Version(version))  # normalize
-        package_venvs_dir = self.package_dir(package) / version
-        if not package_venvs_dir.exists():
+        version = Version(best_match.version or "")
+        installed_versions = self.get_installations(name)
+        if (
+            installed := next((i.version == version for i in installed_versions), None)
+        ) is not None:
+            return installed
 
-            def get_access_time(version: str) -> float:
-                return package_venvs_dir.with_name(version).stat().st_atime
+        installed_versions.sort(key=Installation.get_access_time)
 
-            versions = sorted(self.get_versions(package), key=get_access_time)
-            if len(versions) >= MAX_VERSION_NUMBER:
-                to_remove = versions[: len(versions) - MAX_VERSION_NUMBER + 1]
-                for v in to_remove:
-                    shutil.rmtree(self.package_dir(package) / v)
-            self._run_pip("install", f"{package}=={version}", venv=package_venvs_dir)
-        return package_venvs_dir
+        if len(installed_versions) >= MAX_VERSION_NUMBER:
+            to_remove = installed_versions[
+                : len(installed_versions) - MAX_VERSION_NUMBER + 1
+            ]
+            for v in to_remove:
+                shutil.rmtree(v.venv)
+        venv_dir = self.package_dir(name) / str(uuid.uuid4())
+        self._run_pip("install", f"{name}=={version}", venv=venv_dir)
+        dist = Distribution.at(
+            next(venv_dir.glob(f"lib/**/site-packages/{name}-*.dist-info"))
+        )
+        return Installation(name, dist, venv_dir)
 
     def _run_pip(self, *args: str, venv: Path) -> None:
         venv = PackageManager.make_venv(venv, with_pip=False)
@@ -127,7 +149,7 @@ class OneManager:
         pip_command = [
             str(venv / bin_dir / "python"),
             "-I",
-            str(self._get_shared_pip()),
+            str(self._pip_location()),
             *args,
         ]
         subprocess.run(
@@ -137,7 +159,14 @@ class OneManager:
             stderr=subprocess.DEVNULL,
         )
 
-    def _get_shared_pip(self) -> Path:
+    def _pip_location(self) -> Path:
+        try:
+            from pip import __file__ as pip_file
+        except ImportError:
+            pass
+        else:
+            return Path(pip_file).parent
+        # pip is not installed, download the wheel from PyPI
         shared_pip = self._tool_dir / "shared" / "pip.whl"
         if not shared_pip.exists():
             best_pip = self.package_finder.find_best_match("pip").best
@@ -148,3 +177,30 @@ class OneManager:
             )
             os.replace(wheel, shared_pip)
         return shared_pip / "pip"
+
+    def update_package_manager(self) -> None:
+        pm, requirement = self.detect_package_manager()
+        self.install_tool(pm.name, requirement)
+
+    def use_package_manager(self, spec: str) -> None:
+        req = Requirement(spec)
+        self.install_tool(canonicalize_name(req.name), req)
+        self.pyproject.setdefault("tool", {}).setdefault("onepm", {})[
+            "package-manager"
+        ] = str(req)
+        with open(self.path / "pyproject.toml", "w") as f:
+            tomlkit.dump(self.pyproject, f)
+
+
+@dataclass(frozen=True)
+class Installation:
+    name: str
+    distribution: Distribution
+    venv: Path
+
+    @property
+    def version(self) -> Version:
+        return Version(self.distribution.version)
+
+    def get_access_time(self) -> float:
+        return self.venv.stat().st_atime

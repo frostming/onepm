@@ -5,8 +5,9 @@ authors = [
     {name = "Frost Ming", email = "mianghong@gmail.com"},
 ]
 dependencies = [
-    "tomli>=2.0.1; python_version < \"3.11\"",
     "packaging>=22.1",
+    "tomlkit>=0.12.3",
+    "unearth>=0.14.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
@@ -31,25 +32,23 @@ pu = "onepm:pu"
 pr = "onepm:pr"
 pun = "onepm:pun"
 pa = "onepm:pa"
-pdm = "onepm:pdm [all]"
-poetry = "onepm:poetry [all]"
-pipenv = "onepm:pipenv [all]"
+pdm = "onepm:pdm"
+poetry = "onepm:poetry"
+pipenv = "onepm:pipenv"
+onepm = "onepm.cli:main"
 
-[project.optional-dependencies]
-all = [
-    "unearth>=0.14.0",
-]
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
 [tool.pdm.version]
 source = "scm"
 
 [tool.pdm.dev-dependencies]
 test = [
     "pytest>=7.1.2",
+    "pytest-mock>=3.12.0",
 ]
-
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
 
 [tool.ruff]
 target-version = "py310"
@@ -66,3 +65,6 @@ extend-select = [
 
 [tool.ruff.isort]
 known-first-party = ["onepm"]
+
+[tool.onepm]
+package-manager = "pdm>=2.12.0"

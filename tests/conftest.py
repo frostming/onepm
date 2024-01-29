@@ -1,21 +1,13 @@
 import os
-from unittest import mock
 
 import pytest
 
-from onepm.core import PDM, Pip, Pipenv, Poetry
+from onepm.core import OneManager
 
 
 @pytest.fixture()
-def execute_args(monkeypatch):
-    call_args = []
-
-    @staticmethod
-    def fake_execute(args):
-        call_args[:] = args
-
-    monkeypatch.setattr("onepm.pm.base.PackageManager._execute_command", fake_execute)
-    return call_args
+def execute_command(mocker):
+    return mocker.patch("onepm.pm.base.PackageManager._execute_command")
 
 
 @pytest.fixture()
@@ -29,33 +21,32 @@ def project(tmp_path):
 
 
 @pytest.fixture()
-def pip(monkeypatch):
-    monkeypatch.setattr("onepm.determine_package_manager", mock.Mock(return_value=Pip))
+def pip(mocker, project):
+    with open("pyproject.toml", "a") as f:
+        f.write('[tool.onepm]\npackage-manager = "pip"\n')
+    mocker.patch("onepm.pm.pip.Pip.ensure_executable", return_value="python")
+    assert OneManager().get_package_manager().name == "pip"
 
 
 @pytest.fixture()
-def poetry(monkeypatch):
-    monkeypatch.setattr(
-        "onepm.determine_package_manager", mock.Mock(return_value=Poetry)
-    )
-    monkeypatch.setattr(
-        "onepm.pm.base.PackageManager.find_executable", mock.Mock(return_value="poetry")
-    )
+def poetry(mocker, project):
+    with open("pyproject.toml", "a") as f:
+        f.write('[tool.onepm]\npackage-manager = "poetry"\n')
+    mocker.patch("onepm.pm.poetry.Poetry.ensure_executable", return_value="poetry")
+    assert OneManager().get_package_manager().name == "poetry"
 
 
 @pytest.fixture()
-def pipenv(monkeypatch):
-    monkeypatch.setattr(
-        "onepm.determine_package_manager", mock.Mock(return_value=Pipenv)
-    )
-    monkeypatch.setattr(
-        "onepm.pm.base.PackageManager.find_executable", mock.Mock(return_value="pipenv")
-    )
+def pipenv(mocker, project):
+    with open("pyproject.toml", "a") as f:
+        f.write('[tool.onepm]\npackage-manager = "pipenv"\n')
+    mocker.patch("onepm.pm.pipenv.Pipenv.ensure_executable", return_value="pipenv")
+    assert OneManager().get_package_manager().name == "pipenv"
 
 
 @pytest.fixture()
-def pdm(monkeypatch):
-    monkeypatch.setattr("onepm.determine_package_manager", mock.Mock(return_value=PDM))
-    monkeypatch.setattr(
-        "onepm.pm.base.PackageManager.find_executable", mock.Mock(return_value="pdm")
-    )
+def pdm(mocker, project):
+    with open("pyproject.toml", "a") as f:
+        f.write('[tool.onepm]\npackage-manager = "pdm"')
+    mocker.patch("onepm.pm.pdm.PDM.ensure_executable", return_value="pdm")
+    assert OneManager().get_package_manager().name == "pdm"

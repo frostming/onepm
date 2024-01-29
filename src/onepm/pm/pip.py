@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import contextlib
 import os
-import subprocess
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NoReturn
@@ -26,19 +26,17 @@ class Pip(PackageManager):
     def ensure_executable(cls, core: OneManager, requirement: Requirement) -> str:
         from importlib.metadata import Distribution
 
-        venv = cls.make_venv(Path(".venv"))
+        if "VIRTUAL_ENV" in os.environ:
+            venv = Path(os.environ["VIRTUAL_ENV"])
+        else:
+            venv = cls.make_venv(Path(".venv"))
         bin_dir = "Scripts" if sys.platform == "win32" else "bin"
         executable = cls.find_executable("python", venv / bin_dir)
         lib_dir = venv / "lib"
-        pip_dist = next(lib_dir.glob("**/site-packages/pip-*-dist.info"))
+        pip_dist = next(lib_dir.glob("**/site-packages/pip-*.dist-info"))
         dist = Distribution.at(pip_dist)
-        if dist.version not in requirement:
-            subprocess.run(
-                [executable, "-m", "pip", "install", "-U", str(requirement)],
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+        if dist.version not in requirement.specifier:
+            core._run_pip("install", "-U", str(requirement), venv=venv)
         return executable
 
     def _find_requirements_txt(self) -> str | None:
@@ -47,10 +45,14 @@ class Pip(PackageManager):
                 return filename
         return None
 
-    def _find_setup_py(self) -> str | None:
-        for filename in ["setup.py", "pyproject.toml"]:
-            if os.path.exists(filename):
-                return filename
+    def _find_pyproject(self) -> str | None:
+        if os.path.exists("setup.py"):
+            return "setup.py"
+        with contextlib.suppress(FileNotFoundError):
+            with open("pyproject.toml") as f:
+                pyproject = f.read().splitlines()
+            if "[project]" in pyproject:
+                return "pyproject.toml"
         return None
 
     def get_command(self) -> list[str]:
@@ -59,10 +61,10 @@ class Pip(PackageManager):
     def install(self, *args: str) -> NoReturn:
         if not args:
             requirements = self._find_requirements_txt()
-            setup_py = self._find_setup_py()
+            pyproject = self._find_pyproject()
             if requirements:
                 expanded_args = ["install", "-r", requirements]
-            elif setup_py:
+            elif pyproject:
                 expanded_args = ["install", "."]
             else:
                 raise Exception(

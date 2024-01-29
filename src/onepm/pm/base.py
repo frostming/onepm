@@ -5,24 +5,13 @@ import os
 import shutil
 import subprocess
 import sys
-from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable, NoReturn
 
 from packaging.requirements import Requirement
-from packaging.version import Version
 
 if TYPE_CHECKING:
     from onepm.core import OneManager
-
-
-@lru_cache(maxsize=1)
-def wrapper_enabled() -> bool:
-    try:
-        import unearth  # noqa: F401
-    except ModuleNotFoundError:
-        return False
-    return True
 
 
 class PackageManager(metaclass=abc.ABCMeta):
@@ -98,18 +87,15 @@ class PackageManager(metaclass=abc.ABCMeta):
     @classmethod
     def ensure_executable(cls, core: OneManager, requirement: Requirement) -> str:
         name = cls.get_executable_name()
-        if not wrapper_enabled():
-            # Find in PATH
-            return cls.find_executable(name)
 
-        versions = core.get_versions(cls.name)
-        best_match = max(
-            filter(requirement.specifier.contains, versions), default=None, key=Version
+        versions = core.get_installations(cls.name)
+        best_match = next(
+            filter(lambda v: requirement.specifier.contains(v.version), versions), None
         )
         bin_dir = "Scripts" if sys.platform == "win32" else "bin"
-        if best_match is not None:
-            return str(core.package_dir(cls.name) / best_match / bin_dir / name)
-        return str(core.install_tool(cls.name, requirement) / bin_dir / name)
+        if best_match is None:
+            best_match = core.install_tool(cls.name, requirement)
+        return str(best_match.venv / bin_dir / name)
 
     @staticmethod
     def make_venv(venv_path: Path, with_pip: bool = True) -> Path:
