@@ -9,7 +9,9 @@ def parse_args() -> argparse.Namespace:
     commands.add_parser(
         "install", help="Install the package manager configured in project file"
     )
-    use_cmd = commands.add_parser("use", help="Use a specific package manager")
+    use_cmd = commands.add_parser(
+        "use", help="Use the package manager given by the requirement spec"
+    )
     use_cmd.add_argument("spec", help="package manager requirement spec")
     commands.add_parser(
         "update", aliases=["up"], help="Update the package manager used in the project"
@@ -24,7 +26,9 @@ def parse_args() -> argparse.Namespace:
         help="The name of package manager",
     )
     list_cmd = commands.add_parser(
-        "list", aliases=["ls"], help="List all versions of the given package manager"
+        "list",
+        aliases=["ls"],
+        help="List all installed versions of the given package manager",
     )
     list_cmd.add_argument(
         "name", help="The name of package manager", choices=list(PACKAGE_MANAGERS)

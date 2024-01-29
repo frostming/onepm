@@ -115,3 +115,11 @@ package-manager = "poetry>=1.1.0"
 ```
 
 _For Python package management, OnePM is all you need._
+
+## OnePM Management Commands
+
+- `onepm install`: Install the package manager configured in project file
+- `onepm use $SPEC`: Use the package manager given by the requirement spec
+- `onepm update|up`: Update the package manager used in the project
+- `onepm cleanup [$NAME]`: Clean up installations of specified package manager or all
+- `onepm list|ls $NAME`: List all installed versions of the given package manager
