@@ -94,3 +94,32 @@ pa
 ```
 
 If the package manager agent is pip, **OnePM will enforce an activated virtualenv, or a `.venv` under the current directory**.
+
+## Shims for Package Managers
+
+OnePM also provides shim for the package managers like [corepack](https://nodejs.org/api/corepack.html),
+so you don't need to install package managers yourself.
+
+OnePM reads the `package-manager` field under `[tool.onepm]` table in `pyproject.toml`, and install the required package manager with the correct version in an isolated environment.
+
+```toml
+[tool.onepm]
+package-manager = "poetry"
+```
+
+Or you can restrict the version range:
+
+```toml
+[tool.onepm]
+package-manager = "poetry>=1.1.0"
+```
+
+_For Python package management, OnePM is all you need._
+
+## OnePM Management Commands
+
+- `onepm install`: Install the package manager configured in project file
+- `onepm use $SPEC`: Use the package manager given by the requirement spec
+- `onepm update|up`: Update the package manager used in the project
+- `onepm cleanup [$NAME]`: Clean up installations of specified package manager or all
+- `onepm list|ls $NAME`: List all installed versions of the given package manager

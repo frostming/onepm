@@ -13,9 +13,6 @@ class Pipenv(PackageManager):
     def matches(cls, pyproject: dict[str, Any]) -> bool:
         return os.path.exists("Pipfile.lock") or os.path.exists("Pipfile")
 
-    def get_command(self) -> list[str]:
-        return [self.find_executable(self.name)]
-
     def install(self, *args: str) -> NoReturn:
         self.execute("install", *args)
 

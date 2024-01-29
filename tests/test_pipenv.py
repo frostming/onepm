@@ -6,31 +6,34 @@ pytestmark = pytest.mark.usefixtures("pipenv")
 
 
 @pytest.mark.parametrize("args", [[], ["--dev"], ["--keep-outdated", "requests"]])
-def test_pipenv_pi(project, execute_args, args):
+def test_pipenv_pi(project, execute_command, args):
     pi(args)
-    assert execute_args[1:] == ["install", *args]
+    execute_command.assert_called_with(["pipenv", "install", *args])
 
 
-def test_pipenv_pr(project, execute_args):
+def test_pipenv_pr(project, execute_command):
     pr(["test", "--no-report"])
-    assert execute_args[1:] == ["run", "test", "--no-report"]
+    execute_command.assert_called_with(["pipenv", "run", "test", "--no-report"])
 
 
-def test_pipenv_pu(project, execute_args):
+def test_pipenv_pu(project, execute_command):
     pu(["requests"])
-    assert execute_args[1:] == ["update", "requests"]
+    execute_command.assert_called_with(["pipenv", "update", "requests"])
 
 
-def test_pipenv_pun(project, execute_args):
+def test_pipenv_pun(project, execute_command):
     pun(["-d", "requests"])
-    assert execute_args[1:] == ["uninstall", "-d", "requests"]
+    execute_command.assert_called_with(["pipenv", "uninstall", "-d", "requests"])
 
 
-def test_pipenv_pa(project, execute_args):
+def test_pipenv_pa(project, execute_command):
     pa(["--venv", "--system-site-packages", "--python", "3.7"])
-    assert execute_args[1:] == [
-        "--venv",
-        "--system-site-packages",
-        "--python",
-        "3.7",
-    ]
+    execute_command.assert_called_with(
+        [
+            "pipenv",
+            "--venv",
+            "--system-site-packages",
+            "--python",
+            "3.7",
+        ]
+    )

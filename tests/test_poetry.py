@@ -15,26 +15,26 @@ pytestmark = pytest.mark.usefixtures("poetry")
         (["-D", "-E", "foo", "-E", "bar", "requests"], "add"),
     ],
 )
-def test_poetry_pi_dispatch(project, execute_args, args, expected_command):
+def test_poetry_pi_dispatch(project, execute_command, args, expected_command):
     pi(args)
-    assert execute_args[1:] == [expected_command, *args]
+    execute_command.assert_called_with(["poetry", expected_command, *args])
 
 
-def test_poetry_pu(project, execute_args):
+def test_poetry_pu(project, execute_command):
     pu(["requests"])
-    assert execute_args[1:] == ["update", "requests"]
+    execute_command.assert_called_with(["poetry", "update", "requests"])
 
 
-def test_poetry_pun(project, execute_args):
+def test_poetry_pun(project, execute_command):
     pun(["requests"])
-    assert execute_args[1:] == ["remove", "requests"]
+    execute_command.assert_called_with(["poetry", "remove", "requests"])
 
 
-def test_poetry_pr(project, execute_args):
+def test_poetry_pr(project, execute_command):
     pr(["test", "--no-report"])
-    assert execute_args[1:] == ["run", "test", "--no-report"]
+    execute_command.assert_called_with(["poetry", "run", "test", "--no-report"])
 
 
-def test_poetry_pa(project, execute_args):
+def test_poetry_pa(project, execute_command):
     pa(["env", "--python"])
-    assert execute_args[1:] == ["env", "--python"]
+    execute_command.assert_called_with(["poetry", "env", "--python"])

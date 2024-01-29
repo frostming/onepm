@@ -1,10 +1,17 @@
 from __future__ import annotations
 
+import contextlib
 import os
 import sys
-from typing import Any, NoReturn
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, NoReturn
+
+from packaging.requirements import Requirement
 
 from onepm.pm.base import PackageManager
+
+if TYPE_CHECKING:
+    from onepm.core import OneManager
 
 
 class Pip(PackageManager):
@@ -15,23 +22,22 @@ class Pip(PackageManager):
         """Fallback package manager, always matches."""
         return True
 
-    def _ensure_virtualenv(self) -> str:
-        this_venv = os.path.abspath(".venv")
-        if os.path.exists(this_venv) and os.path.exists(
-            os.path.join(this_venv, "pyvenv.cfg")
-        ):
-            return this_venv
-        if "VIRTUAL_ENV" in os.environ:
-            return os.environ["VIRTUAL_ENV"]
+    @classmethod
+    def ensure_executable(cls, core: OneManager, requirement: Requirement) -> str:
+        from importlib.metadata import Distribution
 
-        try:
-            import venv
-        except ImportError:
-            raise Exception(
-                "To use pip, you must activate a virtualenv or create one at `.venv`."
-            ) from None
-        venv.create(this_venv, with_pip=True)
-        return this_venv
+        if "VIRTUAL_ENV" in os.environ:
+            venv = Path(os.environ["VIRTUAL_ENV"])
+        else:
+            venv = cls.make_venv(Path(".venv"))
+        bin_dir = "Scripts" if sys.platform == "win32" else "bin"
+        executable = cls.find_executable("python", venv / bin_dir)
+        lib_dir = venv / "lib"
+        pip_dist = next(lib_dir.glob("**/site-packages/pip-*.dist-info"))
+        dist = Distribution.at(pip_dist)
+        if dist.version not in requirement.specifier:
+            core._run_pip("install", "-U", str(requirement), venv=venv)
+        return executable
 
     def _find_requirements_txt(self) -> str | None:
         for filename in ["requirements.txt", "requirements.in"]:
@@ -39,29 +45,26 @@ class Pip(PackageManager):
                 return filename
         return None
 
-    def _find_setup_py(self) -> str | None:
-        for filename in ["setup.py", "pyproject.toml"]:
-            if os.path.exists(filename):
-                return filename
+    def _find_pyproject(self) -> str | None:
+        if os.path.exists("setup.py"):
+            return "setup.py"
+        with contextlib.suppress(FileNotFoundError):
+            with open("pyproject.toml") as f:
+                pyproject = f.read().splitlines()
+            if "[project]" in pyproject:
+                return "pyproject.toml"
         return None
 
     def get_command(self) -> list[str]:
-        venv = self._ensure_virtualenv()
-        if sys.platform == "win32":
-            bin_dir = "Scripts"
-            exe = ".exe"
-        else:
-            bin_dir = "bin"
-            exe = ""
-        return [os.path.join(venv, bin_dir, f"python{exe}"), "-m", "pip"]
+        return [self.executable, "-m", "pip"]
 
     def install(self, *args: str) -> NoReturn:
         if not args:
             requirements = self._find_requirements_txt()
-            setup_py = self._find_setup_py()
+            pyproject = self._find_pyproject()
             if requirements:
                 expanded_args = ["install", "-r", requirements]
-            elif setup_py:
+            elif pyproject:
                 expanded_args = ["install", "."]
             else:
                 raise Exception(
@@ -82,10 +85,7 @@ class Pip(PackageManager):
         if len(args) == 0:
             raise Exception("Please specify a command to run.")
         command, *rest = args
-        venv = self._ensure_virtualenv()
-        bin_dir = "Scripts" if sys.platform == "win32" else "bin"
+        bin_dir = os.path.dirname(self.executable)
         path = os.getenv("PATH", "")
-        command = self.find_executable(
-            command, os.pathsep.join([os.path.join(venv, bin_dir), path])
-        )
+        command = self.find_executable(command, os.pathsep.join([bin_dir, path]))
         self._execute_command([command, *rest])

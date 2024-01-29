@@ -18,9 +18,6 @@ class PDM(PackageManager):
             return True
         return "pdm" in pyproject.get("tool", {})
 
-    def get_command(self) -> list[str]:
-        return [self.find_executable(self.name)]
-
     def install(self, *args: str) -> NoReturn:
         if self.has_unknown_args(args, ["p", "project", "G", "group", "L", "lockfile"]):
             command = "add"
