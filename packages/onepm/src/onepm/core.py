@@ -11,6 +11,7 @@ from importlib.metadata import Distribution
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import tomlkit
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
 from packaging.version import Version
@@ -24,7 +25,6 @@ from onepm.pm.poetry import Poetry
 if TYPE_CHECKING:
     from unearth import PackageFinder
 
-import tomlkit
 
 PACKAGE_MANAGERS: dict[str, type[PackageManager]] = {
     p.name: p  # type: ignore[type-abstract]
