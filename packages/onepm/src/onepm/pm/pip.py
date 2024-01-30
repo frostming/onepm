@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import os
+import subprocess
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NoReturn
@@ -36,7 +37,15 @@ class Pip(PackageManager):
         pip_dist = next(lib_dir.glob("**/site-packages/pip-*.dist-info"))
         dist = Distribution.at(pip_dist)
         if dist.version not in requirement.specifier:
-            core._run_pip("install", "-U", str(requirement), venv=venv)
+            if not core.shim_enabled():
+                subprocess.run(
+                    [executable, "-m", "pip", "install", "-U", str(requirement)],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            else:
+                core._run_pip("install", "-U", str(requirement), venv=venv)
         return executable
 
     def _find_requirements_txt(self) -> str | None:

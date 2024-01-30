@@ -1,6 +1,6 @@
 # onepm
 
-Picks the right package manager for you
+Picks the right package manager for you.
 
 Don't make me think about which package manager to use when I clone a project from other people. OnePM will pick the right package manager by searching for the lock files and/or the project settings in `pyproject.toml`.
 
