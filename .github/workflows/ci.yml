@@ -23,7 +23,7 @@ jobs:
           cache: true
       - name: Install Dependencies
         run: |
-          pdm sync -dGtest
+          pdm sync
       - name: Run Tests
         run: |
-          pdm run pytest -v tests
+          pdm run test

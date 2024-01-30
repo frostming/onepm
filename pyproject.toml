@@ -1,18 +1,12 @@
 [project]
-name = "onepm"
-description = "Picks the right package manager for you"
+name = "onepm-workspace"
+description = "Picks the right package manager for you."
 authors = [
     {name = "Frost Ming", email = "mianghong@gmail.com"},
-]
-dependencies = [
-    "packaging>=22.1",
-    "tomlkit>=0.12.3",
-    "unearth>=0.14.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
-dynamic = ["version"]
 classifiers = [
     "Topic :: Software Development :: Build Tools",
     "Programming Language :: Python :: 3",
@@ -22,32 +16,17 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 
-[project.urls]
-Homepage = "https://github.com/frostming/onepm"
-Changelog = "https://github.com/frostming/onepm/releases"
-
-[project.scripts]
-pi = "onepm:pi"
-pu = "onepm:pu"
-pr = "onepm:pr"
-pun = "onepm:pun"
-pa = "onepm:pa"
-pdm = "onepm:pdm"
-poetry = "onepm:poetry"
-pipenv = "onepm:pipenv"
-onepm = "onepm.cli:main"
-
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
-[tool.pdm.version]
-source = "scm"
+[tool.pdm]
+distribution = false
 
 [tool.pdm.dev-dependencies]
 test = [
     "pytest>=7.1.2",
     "pytest-mock>=3.12.0",
+]
+workspace = [
+    "-e file:///${PROJECT_ROOT}/packages/onepm#egg=onepm",
+    "-e file:///${PROJECT_ROOT}/packages/onepm-shims#egg=onepm-shims",
 ]
 
 [tool.ruff]
@@ -68,3 +47,11 @@ known-first-party = ["onepm"]
 
 [tool.onepm]
 package-manager = "pdm>=2.12.0"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.10"
+
+[tool.pdm.scripts]
+test = "pytest -ra packages/onepm/tests"

@@ -61,24 +61,24 @@ class PackageManager(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def install(self, *args: str) -> NoReturn:
-        pass
+        ...
 
     @abc.abstractmethod
     def uninstall(self, *args: str) -> NoReturn:
-        pass
+        ...
 
     @abc.abstractmethod
     def update(self, *args: str) -> NoReturn:
-        pass
+        ...
 
     @abc.abstractmethod
     def run(self, *args: str) -> NoReturn:
-        pass
+        ...
 
     @classmethod
     @abc.abstractmethod
     def matches(cls, pyproject: dict[str, Any]) -> bool:
-        pass
+        ...
 
     @classmethod
     def get_executable_name(cls) -> str:
@@ -87,7 +87,8 @@ class PackageManager(metaclass=abc.ABCMeta):
     @classmethod
     def ensure_executable(cls, core: OneManager, requirement: Requirement) -> str:
         name = cls.get_executable_name()
-
+        if not core.shim_enabled():
+            return cls.find_executable(name)
         versions = core.get_installations(cls.name)
         best_match = next(
             filter(lambda v: requirement.specifier.contains(v.version), versions), None

@@ -50,8 +50,20 @@ class OneManager:
 
         self._tool_dir = Path.home() / ".onepm"
 
+    def shim_enabled(self) -> bool:
+        try:
+            import unearth
+        except ModuleNotFoundError:
+            return False
+        return True
+
     @cached_property
     def package_finder(self) -> PackageFinder:
+        if not self.shim_enabled():
+            raise ImportError(
+                "Package manager shims are disabled, please re-install onepm with '[shims]' extra."
+            )
+
         import unearth
 
         index_urls = [self.index_url] if self.index_url else []
@@ -99,7 +111,7 @@ class OneManager:
         venvs = self.package_dir(name)
         if not venvs.exists():
             return []
-        versions: list[Version] = []
+        versions: list[Installation] = []
         for venv in venvs.iterdir():
             candidate = next(
                 venv.glob(f"lib/**/site-packages/{name}-*.dist-info"), None
@@ -124,7 +136,9 @@ class OneManager:
         version = Version(best_match.version or "")
         installed_versions = self.get_installations(name)
         if (
-            installed := next((i.version == version for i in installed_versions), None)
+            installed := next(
+                (i for i in installed_versions if i.version == version), None
+            )
         ) is not None:
             return installed
 
