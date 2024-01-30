@@ -98,7 +98,11 @@ If the package manager agent is pip, **OnePM will enforce an activated virtualen
 ## Shims for Package Managers
 
 OnePM also provides shim for the package managers like [corepack](https://nodejs.org/api/corepack.html),
-so you don't need to install package managers yourself.
+so you don't need to install package managers yourself. To enable it, install OnePM with `shims` extra:
+
+```bash
+pipx install onepm[shims]
+```
 
 OnePM reads the `package-manager` field under `[tool.onepm]` table in `pyproject.toml`, and install the required package manager with the correct version in an isolated environment.
 
