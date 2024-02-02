@@ -1,9 +1,17 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "*"
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to release, or "all" to release all packages'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - main
+          - shims
 
 jobs:
   release-pypi:
@@ -23,12 +31,28 @@ jobs:
         with:
           node-version: 20.x
 
+      - name: Get version
+        id: get_version
+        run: |
+          echo "VERSION=$(python .github/scripts/get_version.py)" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: 'v${{ steps.get_version.outputs.VERSION }}'
+          tag_name: 'v${{ steps.get_version.outputs.VERSION }}'
+
       - run: npx changelogithub
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Build artifacts
+      - name: Build main
+        if: github.event.inputs.package == 'all' || github.event.inputs.package == 'main'
         run: pipx run build
+
+      - name: Build shims
+        if: github.event.inputs.package == 'all' || github.event.inputs.package == 'shims'
+        run: pipx run build -C mina-target=shims
 
       - name: Upload to Pypi
         run: |
