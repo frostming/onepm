@@ -163,7 +163,7 @@ class OneManager:
         pip_command = [
             str(venv / bin_dir / "python"),
             "-I",
-            str(self._pip_location()),
+            str(self._pip_location),
             *args,
         ]
         subprocess.run(
@@ -173,13 +173,18 @@ class OneManager:
             stderr=subprocess.DEVNULL,
         )
 
+    @cached_property
     def _pip_location(self) -> Path:
         try:
             from pip import __file__ as pip_file
         except ImportError:
             pass
         else:
-            return Path(pip_file).parent
+            # copy to the shared location and use it from that
+            shared_pip = self._tool_dir / "shared" / "pip"
+            if not shared_pip.exists():
+                shutil.copytree(Path(pip_file).parent, shared_pip)
+            return shared_pip
         # pip is not installed, download the wheel from PyPI
         shared_pip = self._tool_dir / "shared" / "pip.whl"
         if not shared_pip.exists():
