@@ -42,6 +42,9 @@ jobs:
           name: 'v${{ steps.get_version.outputs.VERSION }}'
           tag_name: 'v${{ steps.get_version.outputs.VERSION }}'
 
+      - name: Pull tags
+        run: git pull --tags
+
       - run: npx changelogithub
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
