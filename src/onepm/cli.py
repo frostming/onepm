@@ -25,6 +25,11 @@ def parse_args() -> argparse.Namespace:
         choices=list(PACKAGE_MANAGERS),
         help="The name of package manager",
     )
+    cleanup_cmd.add_argument(
+        "version",
+        nargs=argparse.OPTIONAL,
+        help="The version of the package to remove",
+    )
     list_cmd = commands.add_parser(
         "list",
         aliases=["ls"],

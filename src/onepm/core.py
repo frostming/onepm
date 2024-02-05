@@ -121,9 +121,22 @@ class OneManager:
             versions.append(Installation(name, Distribution.at(candidate), venv))
         return sorted(versions, key=lambda i: i.version, reverse=True)
 
-    def cleanup(self, name: str | None) -> None:
+    def cleanup(self, name: str | None, version: str | None) -> None:
         if name is None:
             shutil.rmtree(self._tool_dir / "venvs", ignore_errors=True)
+            return
+        if version is not None:
+            matched = next(
+                (
+                    i
+                    for i in self.get_installations(name)
+                    if i.version == Version(version)
+                ),
+                None,
+            )
+            if matched is None:
+                raise ValueError(f"No installation of {name}=={version} is found")
+            shutil.rmtree(matched.venv)
             return
         package_dir = self.package_dir(name)
         if package_dir.exists():
