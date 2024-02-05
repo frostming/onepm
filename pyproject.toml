@@ -1,5 +1,5 @@
 [build-system]
-requires = ["pdm-backend"]
+requires = ["pdm-backend", "mina-build>=0.6"]
 build-backend = "pdm.backend"
 
 [project]
@@ -47,13 +47,14 @@ test = "pytest -ra tests"
 target-version = "py310"
 
 [tool.mina]
-default-target = "main"
+enabled = true
+default-build-target = "onepm"
 
-[tool.mina.packages.main]
+[tool.mina.packages.onepm]
 includes = ["src/onepm"]
 source-includes = ["tests/"]
 
-[tool.mina.packages.main.project]
+[tool.mina.packages.onepm.project]
 name = "onepm"
 description = "Picks the right package manager for you"
 dependencies = [
@@ -61,10 +62,10 @@ dependencies = [
     "tomlkit>=0.12.3",
 ]
 
-[tool.mina.packages.main.project.optional-dependencies]
+[tool.mina.packages.onepm.project.optional-dependencies]
 shims = ["onepm-shims"]
 
-[tool.mina.packages.main.project.scripts]
+[tool.mina.packages.onepm.project.scripts]
 pi = "onepm:pi"
 pu = "onepm:pu"
 pr = "onepm:pr"
