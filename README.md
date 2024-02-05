@@ -101,7 +101,7 @@ OnePM also provides shim for the package managers like [corepack](https://nodejs
 so you don't need to install package managers yourself. To enable it, install OnePM with `shims` extra:
 
 ```bash
-pipx install onepm[shims]
+pipx install --include-deps onepm[shims]
 ```
 
 OnePM reads the `package-manager` field under `[tool.onepm]` table in `pyproject.toml`, and install the required package manager with the correct version in an isolated environment.
