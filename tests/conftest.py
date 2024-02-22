@@ -50,3 +50,11 @@ def pdm(mocker, project):
         f.write('[tool.onepm]\npackage-manager = "pdm"')
     mocker.patch("onepm.pm.pdm.PDM.ensure_executable", return_value="pdm")
     assert OneManager().get_package_manager().name == "pdm"
+
+
+@pytest.fixture()
+def uv(mocker, project):
+    with open("pyproject.toml", "a") as f:
+        f.write('[tool.onepm]\npackage-manager = "uv"')
+    mocker.patch("onepm.pm.uv.Uv.ensure_executable", return_value="uv")
+    assert OneManager().get_package_manager().name == "uv"

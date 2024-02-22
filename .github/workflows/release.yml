@@ -3,6 +3,11 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
+      patch:
+        description: 'Patch version'
+        required: false
+        default: false
+        type: boolean
       package:
         description: 'Package to release, or "all" to release all packages'
         required: true
@@ -34,12 +39,16 @@ jobs:
       - name: Get version
         id: get_version
         run: |
-          echo "VERSION=$(python .github/scripts/get_version.py)" >> $GITHUB_OUTPUT
+          if [ "${{ github.event.inputs.patch }}" = "true" ]; then
+            echo "VERSION=$(python .github/scripts/get_version.py --patch)" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=$(python .github/scripts/get_version.py)" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          name: 'v${{ steps.get_version.outputs.VERSION }}'
+          name: '${{ github.event.inputs.package }}@v${{ steps.get_version.outputs.VERSION }}'
           tag_name: 'v${{ steps.get_version.outputs.VERSION }}'
 
       - name: Pull tags

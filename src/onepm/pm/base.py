@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable, NoReturn
+from typing import TYPE_CHECKING, Any, Iterable, Mapping, NoReturn
 
 from packaging.requirements import Requirement
 
@@ -45,16 +45,22 @@ class PackageManager(metaclass=abc.ABCMeta):
             raise Exception(f"{name} is not found in PATH, did you install it?")
         return executable
 
-    def execute(self, *args: str) -> NoReturn:
+    def execute(self, *args: str, env: Mapping[str, str] | None = None) -> NoReturn:
         command_args = self.get_command() + list(args)
-        self._execute_command(command_args)
+        self._execute_command(command_args, env)
 
     @staticmethod
-    def _execute_command(args: list[str]) -> NoReturn:
+    def _execute_command(
+        args: list[str], env: Mapping[str, str] | None = None
+    ) -> NoReturn:
         if sys.platform == "win32":
-            sys.exit(subprocess.run(args).returncode)
+            process_env = {**os.environ, **env} if env else None
+            sys.exit(subprocess.run(args, env=process_env).returncode)
         else:
-            os.execvp(args[0], args)
+            if env:
+                os.execvpe(args[0], args, env)
+            else:
+                os.execvp(args[0], args)
 
     def get_command(self) -> list[str]:
         return [self.executable]

@@ -17,3 +17,4 @@ def shim(package_manager: str, args: list[str] | None = None) -> NoReturn:
 pdm = partial(shim, "pdm")
 pipenv = partial(shim, "pipenv")
 poetry = partial(shim, "poetry")
+uv = partial(shim, "uv")

@@ -21,6 +21,7 @@ from onepm.pm.pdm import PDM
 from onepm.pm.pip import Pip
 from onepm.pm.pipenv import Pipenv
 from onepm.pm.poetry import Poetry
+from onepm.pm.uv import Uv
 
 if TYPE_CHECKING:
     from unearth import PackageFinder
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
 
 PACKAGE_MANAGERS: dict[str, type[PackageManager]] = {
     p.name: p  # type: ignore[type-abstract]
-    for p in [Pipenv, PDM, Poetry, Pip]
+    for p in [Pipenv, PDM, Poetry, Uv, Pip]
 }
 
 MAX_VERSION_NUMBER = 5  # keep 5 versions of each package at most
