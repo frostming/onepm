@@ -6,12 +6,13 @@ Don't make me think about which package manager to use when I clone a project fr
 
 This project is created in the same spirit as [@antfu/ni](https://www.npmjs.com/package/@antfu/ni).
 
-Supported package managers: [pip], [pipenv], [poetry], [pdm]
+Supported package managers: [pip], [pipenv], [poetry], [pdm], [uv]
 
 [pip]: https://pypi.org/project/pip/
 [pipenv]: https://pypi.org/project/pipenv/
 [poetry]: https://pypi.org/project/poetry/
 [pdm]: https://pypi.org/project/pdm/
+[uv]: https://pypi.org/project/uv/
 
 ## Install onepm
 
