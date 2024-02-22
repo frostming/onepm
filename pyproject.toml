@@ -84,6 +84,7 @@ dependencies = ["unearth>=0.14.0"]
 pdm = "onepm_shims.shims:pdm"
 pipenv = "onepm_shims.shims:pipenv"
 poetry = "onepm_shims.shims:poetry"
+uv = "onepm_shims.shims:uv"
 
 [tool.ruff.lint]
 extend-select = [

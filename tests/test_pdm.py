@@ -18,26 +18,26 @@ pytestmark = pytest.mark.usefixtures("pdm")
 )
 def test_pdm_pi_dispatch(project, execute_command, args, expected_command):
     pi(args)
-    execute_command.assert_called_with(["pdm", expected_command, *args])
+    execute_command.assert_called_with(["pdm", expected_command, *args], None)
 
 
 def test_pdm_pr(project, execute_command):
     pr(["test", "--no-report"])
-    execute_command.assert_called_with(["pdm", "run", "test", "--no-report"])
+    execute_command.assert_called_with(["pdm", "run", "test", "--no-report"], None)
 
 
 def test_pdm_pu(project, execute_command):
     pu(["-Gtest", "requests"])
-    execute_command.assert_called_with(["pdm", "update", "-Gtest", "requests"])
+    execute_command.assert_called_with(["pdm", "update", "-Gtest", "requests"], None)
 
 
 def test_pdm_pun(project, execute_command):
     pun(["-Gtest", "requests"])
-    execute_command.assert_called_with(["pdm", "remove", "-Gtest", "requests"])
+    execute_command.assert_called_with(["pdm", "remove", "-Gtest", "requests"], None)
 
 
 def test_pdm_pa(project, execute_command):
     pa(["config", "--local", "python.use_venv", "on"])
     execute_command.assert_called_with(
-        ["pdm", "config", "--local", "python.use_venv", "on"]
+        ["pdm", "config", "--local", "python.use_venv", "on"], None
     )
