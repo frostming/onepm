@@ -6,11 +6,13 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable, Mapping, NoReturn
+from typing import TYPE_CHECKING, Any, Iterable, Mapping, overload
 
 from packaging.requirements import Requirement
 
 if TYPE_CHECKING:
+    from typing import Literal, NoReturn
+
     from onepm.core import OneManager
 
 
@@ -45,20 +47,50 @@ class PackageManager(metaclass=abc.ABCMeta):
             raise Exception(f"{name} is not found in PATH, did you install it?")
         return executable
 
-    def execute(self, *args: str, env: Mapping[str, str] | None = None) -> NoReturn:
+    @overload
+    def execute(
+        self,
+        *args: str,
+        env: Mapping[str, str] | None = ...,
+        exit: Literal[False] = ...,
+    ) -> None: ...
+
+    @overload
+    def execute(
+        self, *args: str, env: Mapping[str, str] | None = ..., exit: Literal[True] = ...
+    ) -> NoReturn: ...
+
+    def execute(
+        self, *args: str, env: Mapping[str, str] | None = None, exit: bool = True
+    ) -> Any:
         command_args = self.get_command() + list(args)
-        self._execute_command(command_args, env)
+        self._execute_command(command_args, env, exit=exit)
+
+    @overload
+    @staticmethod
+    def _execute_command(
+        args: list[str], env: Mapping[str, str] | None = ..., exit: Literal[True] = ...
+    ) -> NoReturn: ...
+
+    @overload
+    @staticmethod
+    def _execute_command(
+        args: list[str], env: Mapping[str, str] | None = ..., exit: Literal[False] = ...
+    ) -> None: ...
 
     @staticmethod
     def _execute_command(
-        args: list[str], env: Mapping[str, str] | None = None
-    ) -> NoReturn:
+        args: list[str], env: Mapping[str, str] | None = None, exit: bool = True
+    ) -> Any:
+        process_env = {**os.environ, **env} if env else None
+        if not exit:
+            subprocess.run(args, env=process_env, check=True)
+            return
         if sys.platform == "win32":
-            process_env = {**os.environ, **env} if env else None
             sys.exit(subprocess.run(args, env=process_env).returncode)
         else:
             if env:
-                os.execvpe(args[0], args, env)
+                os.execvpe(args[0], args, process_env)
             else:
                 os.execvp(args[0], args)
 

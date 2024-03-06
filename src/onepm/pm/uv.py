@@ -23,6 +23,25 @@ class Uv(PackageManager):
         return {"VIRTUAL_ENV": os.path.join(os.getcwd(), ".venv")}
 
     def install(self, *args: str) -> NoReturn:
+        if self.has_unknown_args(
+            args,
+            [
+                "C",
+                "config-setting",
+                "only-binary",
+                "no-binary",
+                "cache-dir",
+                "p",
+                "python",
+                "color",
+                "find-links",
+                "f",
+                "extra-index-url",
+                "i",
+                "index-url",
+            ],
+        ):
+            return self.execute("pip", "install", *args)
         if os.path.exists(self.DEFAULT_REQUIREMENT_LOCK):
             target = self.DEFAULT_REQUIREMENT_LOCK
         else:
@@ -30,21 +49,25 @@ class Uv(PackageManager):
         return self.execute("pip", "sync", *args, target)
 
     def update(self, *args: str) -> NoReturn:
-        return self.execute(
+        self.execute(
             "pip",
             "compile",
             "-o",
             self.DEFAULT_REQUIREMENT_LOCK,
             *args,
             self.DEFAULT_REQUIREMENT_IN,
+            exit=False,
         )
+        self.execute("pip", "sync", self.DEFAULT_REQUIREMENT_LOCK)
 
     def uninstall(self, *args: str) -> NoReturn:
         return self.execute("pip", "uninstall", *args)
 
-    def execute(self, *args: str, env: Mapping[str, str] | None = None) -> NoReturn:
+    def execute(
+        self, *args: str, env: Mapping[str, str] | None = None, exit: bool = True
+    ) -> Any:
         env = {**self._virtualenv_env(), **(env or {})}
-        return super().execute(*args, env=env)
+        return super().execute(*args, env=env, exit=exit)
 
     def run(self, *args: str) -> NoReturn:
         if len(args) == 0:

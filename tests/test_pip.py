@@ -60,7 +60,7 @@ def test_pip_install_without_args_from_requirements_txt(
     project.joinpath(filename).touch()
     pi([])
     execute_command.assert_called_with(
-        ["python", "-m", "pip", "install", "-r", filename], None
+        ["python", "-m", "pip", "install", "-r", filename], None, exit=True
     )
 
 
@@ -68,7 +68,7 @@ def test_pip_install_without_args_from_requirements_txt(
 def test_pip_install_with_args(project, execute_command):
     pi(["--upgrade", "bar"])
     execute_command.assert_called_with(
-        ["python", "-m", "pip", "install", "--upgrade", "bar"], None
+        ["python", "-m", "pip", "install", "--upgrade", "bar"], None, exit=True
     )
 
 
@@ -88,7 +88,7 @@ def test_pip_pu_not_supported(project):
 def test_pip_pun(project, execute_command):
     pun(["bar"])
     execute_command.assert_called_with(
-        ["python", "-m", "pip", "uninstall", "bar"], None
+        ["python", "-m", "pip", "uninstall", "bar"], None, exit=True
     )
 
 
@@ -96,5 +96,5 @@ def test_pip_pun(project, execute_command):
 def test_pip_pa(project, execute_command):
     pa(["freeze", "--path", "foo"])
     execute_command.assert_called_with(
-        ["python", "-m", "pip", "freeze", "--path", "foo"], None
+        ["python", "-m", "pip", "freeze", "--path", "foo"], None, exit=True
     )
