@@ -66,25 +66,20 @@ class PackageManager(metaclass=abc.ABCMeta):
         return [self.executable]
 
     @abc.abstractmethod
-    def install(self, *args: str) -> NoReturn:
-        ...
+    def install(self, *args: str) -> NoReturn: ...
 
     @abc.abstractmethod
-    def uninstall(self, *args: str) -> NoReturn:
-        ...
+    def uninstall(self, *args: str) -> NoReturn: ...
 
     @abc.abstractmethod
-    def update(self, *args: str) -> NoReturn:
-        ...
+    def update(self, *args: str) -> NoReturn: ...
 
     @abc.abstractmethod
-    def run(self, *args: str) -> NoReturn:
-        ...
+    def run(self, *args: str) -> NoReturn: ...
 
     @classmethod
     @abc.abstractmethod
-    def matches(cls, pyproject: dict[str, Any]) -> bool:
-        ...
+    def matches(cls, pyproject: dict[str, Any]) -> bool: ...
 
     @classmethod
     def get_executable_name(cls) -> str:
@@ -111,5 +106,5 @@ class PackageManager(metaclass=abc.ABCMeta):
 
         import venv
 
-        venv.create(venv_path, with_pip=with_pip)
+        venv.create(venv_path, with_pip=with_pip, symlinks=True)
         return venv_path
