@@ -5,7 +5,9 @@ import sys
 
 def get_current_version() -> str:
     # get the latest tag
-    tag = subprocess.check_output(["git", "describe", "--abbrev=0"], text=True).strip()
+    tag = subprocess.check_output(
+        ["git", "describe", "--abbrev=0", "--tags"], text=True
+    ).strip()
     version = tag.lstrip("v")
     return version
 
