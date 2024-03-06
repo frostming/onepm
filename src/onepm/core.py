@@ -217,12 +217,16 @@ class OneManager:
 
     def use_package_manager(self, spec: str) -> None:
         req = Requirement(spec)
-        self.install_tool(canonicalize_name(req.name), req)
+        name = canonicalize_name(req.name)
         self.pyproject.setdefault("tool", {}).setdefault("onepm", {})[
             "package-manager"
         ] = str(req)
         with open(self.path / "pyproject.toml", "w") as f:
             tomlkit.dump(self.pyproject, f)
+        for installation in self.get_installations(name):
+            if installation.version in req.specifier:
+                return
+        self.install_tool(canonicalize_name(req.name), req)
 
 
 @dataclass(frozen=True)
