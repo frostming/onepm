@@ -54,7 +54,7 @@ def main():
         case "use":
             core.use_package_manager(args.spec)
         case "cleanup":
-            core.cleanup(args.name)
+            core.cleanup(args.name, args.version)
         case "list" | "ls":
             for installation in core.get_installations(args.name):
                 print(f"- {installation.version} ({installation.venv})")
