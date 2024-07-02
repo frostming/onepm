@@ -211,8 +211,8 @@ class OneManager:
             os.replace(wheel, shared_pip)
         return shared_pip / "pip"
 
-    def update_package_manager(self) -> None:
-        pm, requirement = self.detect_package_manager()
+    def update_package_manager(self, name: str | None = None) -> None:
+        pm, requirement = self.detect_package_manager(name)
         self.install_tool(pm.name, requirement)
 
     def use_package_manager(self, spec: str) -> None:

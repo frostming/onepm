@@ -13,8 +13,14 @@ def parse_args() -> argparse.Namespace:
         "use", help="Use the package manager given by the requirement spec"
     )
     use_cmd.add_argument("spec", help="package manager requirement spec")
-    commands.add_parser(
+    update_cmd = commands.add_parser(
         "update", aliases=["up"], help="Update the package manager used in the project"
+    )
+    update_cmd.add_argument(
+        "name",
+        help="The name of package manager",
+        choices=PACKAGE_MANAGERS,
+        nargs=argparse.OPTIONAL,
     )
     cleanup_cmd = commands.add_parser(
         "cleanup", help="Clean up installations of specified package manager or all"
@@ -50,7 +56,7 @@ def main():
         case "install":
             core.get_package_manager()
         case "update" | "up ":
-            core.update_package_manager()
+            core.update_package_manager(args.name)
         case "use":
             core.use_package_manager(args.spec)
         case "cleanup":
