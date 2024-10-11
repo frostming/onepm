@@ -2,10 +2,13 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "test", "dev"]
+groups = ["default", "dev", "test"]
 strategy = ["cross_platform", "inherit_metadata"]
-lock_version = "4.4.1"
-content_hash = "sha256:72f829506c706e62792e3d6da776d72d51a0ca129d6cd796383789d77559f674"
+lock_version = "4.5.0"
+content_hash = "sha256:77e0a3fcbbc57f11caa12d4c500b68b11d0c48a9f7a30b9994faed623da46fc1"
+
+[[metadata.targets]]
+requires_python = ">=3.10"
 
 [[package]]
 name = "certifi"

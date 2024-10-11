@@ -1,5 +1,5 @@
 [build-system]
-requires = ["pdm-backend", "mina-build>=0.6"]
+requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [project]
