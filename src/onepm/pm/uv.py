@@ -1,91 +1,83 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Mapping, NoReturn
+from typing import Any, NoReturn
 
 from onepm.pm.base import PackageManager
+
+UV_INDEX_FLAGS = ["--no-index"]
+UV_INSTALLER_FLAGS = ["--reinstall", "--compile-bytecode"]
+UV_RESOLVER_FLAGS = ["-U", "--upgrade", "--no-source"]
+UV_BUILD_FLAGS = ["--no-build-isolation", "--no-build", "--no-binary"]
+UV_CACHE_FLAGS = ["-n", "--no-cache", "--refresh"]
+UV_PYTHON_FLAGS = ["--no-python-downloads"]
+UV_GLOBAL_FLAGS = [
+    "-q",
+    "--quiet",
+    "-v",
+    "--verbose",
+    "--native-tls",
+    "--offline",
+    "--no-progress",
+    "--no-config",
+    "--help",
+    "-V",
+    "--version",
+]
+
+UV_LOCK_FLAGS = [
+    "--locked",
+    "--frozen",
+    *UV_INDEX_FLAGS,
+    *UV_RESOLVER_FLAGS,
+    *UV_BUILD_FLAGS,
+    *UV_CACHE_FLAGS,
+    *UV_PYTHON_FLAGS,
+    *UV_GLOBAL_FLAGS,
+]
+UV_SYNC_FLAGS = [
+    "--all-extras",
+    "--no-dev",
+    "--only-dev",
+    "--no-editable",
+    "--inexact",
+    "--no-install-project",
+    "--no-install-workspace",
+    *UV_INSTALLER_FLAGS,
+    *UV_LOCK_FLAGS,
+]
 
 
 class Uv(PackageManager):
     name = "uv"
-    DEFAULT_REQUIREMENT_IN = "pyproject.toml"
-    DEFAULT_REQUIREMENT_LOCK = "requirements.lock"
+    UV_LOCK_FILENAME = "uv.lock"
 
     @classmethod
     def matches(cls, pyproject: dict[str, Any]) -> bool:
-        return os.path.exists(cls.DEFAULT_REQUIREMENT_LOCK) or "project" in pyproject
-
-    def _virtualenv_env(self) -> dict[str, str]:
-        if "VIRTUAL_ENV" in os.environ or "CONDA_PREFIX" in os.environ:
-            return {}
-        if not os.path.exists(".venv/pyvenv.cfg"):
-            self._execute_command([self.executable, "venv"])
-        return {"VIRTUAL_ENV": os.path.join(os.getcwd(), ".venv")}
+        return os.path.exists(cls.UV_LOCK_FILENAME) or "project" in pyproject
 
     def install(self, *args: str) -> NoReturn:
-        if self.has_unknown_args(
-            args,
-            [
-                "C",
-                "config-setting",
-                "only-binary",
-                "no-binary",
-                "cache-dir",
-                "p",
-                "python",
-                "color",
-                "find-links",
-                "f",
-                "extra-index-url",
-                "i",
-                "index-url",
-            ],
+        if (
+            self.get_unknown_args(args, no_values=UV_SYNC_FLAGS)
+            or "-r" in args
+            or any(arg.startswith("--requirements") for arg in args)
         ):
-            return self.execute("pip", "install", *args)
-        if os.path.exists(self.DEFAULT_REQUIREMENT_LOCK):
-            target = self.DEFAULT_REQUIREMENT_LOCK
-        else:
-            target = self.DEFAULT_REQUIREMENT_IN
-        return self.execute("pip", "sync", *args, target)
+            return self.execute("add", *args)
+        return self.execute("sync", *args)
 
     def update(self, *args: str) -> NoReturn:
-        self.execute(
-            "pip",
-            "compile",
-            "-o",
-            self.DEFAULT_REQUIREMENT_LOCK,
-            *args,
-            self.DEFAULT_REQUIREMENT_IN,
-            exit=False,
-        )
-        self.execute("pip", "sync", self.DEFAULT_REQUIREMENT_LOCK)
+        if rest_args := self.get_unknown_args(args, no_values=UV_LOCK_FLAGS):
+            packages = [name for name in rest_args if not name.startswith("-")]
+            args = [arg for arg in args if arg not in packages]
+            for package in packages:
+                args.extend(["--upgrade-package", package])
+            self.execute("lock", *args, exit=False)
+        else:
+            self.execute("lock", "--upgrade", *args, exit=False)
+        self.execute("sync")
 
     def uninstall(self, *args: str) -> NoReturn:
-        return self.execute("pip", "uninstall", *args)
-
-    def execute(
-        self, *args: str, env: Mapping[str, str] | None = None, exit: bool = True
-    ) -> Any:
-        env = {**self._virtualenv_env(), **(env or {})}
-        return super().execute(*args, env=env, exit=exit)
+        return self.execute("remove", *args)
 
     def run(self, *args: str) -> NoReturn:
-        if len(args) == 0:
-            raise Exception("Please specify a command to run.")
-        command, *rest = args
-        env = {**os.environ, **self._virtualenv_env()}
-
-        if "VIRTUAL_ENV" in env:
-            bin_dir = os.path.join(
-                env["VIRTUAL_ENV"], "Scripts" if os.name == "nt" else "bin"
-            )
-        elif "CONDA_PREFIX" in env:
-            bin_dir = os.path.join(env["CONDA_PREFIX"], "bin")
-        else:
-            bin_dir = ""
-        if bin_dir:
-            path = os.pathsep.join([bin_dir, os.getenv("PATH", "")])
-        else:
-            path = None
-        command = self.find_executable(command, path)
-        self._execute_command([command, *rest])
+        return self.execute("run", *args)

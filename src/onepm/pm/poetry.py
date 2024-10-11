@@ -19,7 +19,7 @@ class Poetry(PackageManager):
         return "poetry" in pyproject.get("tool", {})
 
     def install(self, *args: str) -> NoReturn:
-        if self.has_unknown_args(args, ["E", "extras"]):
+        if self.get_unknown_args(args, ["E", "extras"]):
             command = "add"
         else:
             command = "install"

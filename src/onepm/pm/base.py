@@ -20,21 +20,34 @@ class PackageManager(metaclass=abc.ABCMeta):
     name: str
 
     @staticmethod
-    def has_unknown_args(args: Iterable[str], expecting_values: list[str]) -> bool:
+    def get_unknown_args(
+        args: Iterable[str],
+        expecting_values: list[str] | None = None,
+        no_values: list[str] | None = None,
+    ) -> list[str]:
         args_iter = iter(args)
+
+        def takes_value(arg_name: str) -> bool:
+            if expecting_values is not None and arg_name in expecting_values:
+                return True
+            if no_values is not None and arg_name not in no_values:
+                return True
+            return False
+
+        unknown_args: list[str] = []
 
         for arg in args_iter:
             if arg[:2] == "--":
                 arg_name = arg[2:]
-                if arg_name in expecting_values:
+                if takes_value(arg_name):
                     next(args_iter, None)
             elif arg[0] == "-":
                 arg_name = arg[1:]
-                if arg_name in expecting_values:
+                if takes_value(arg_name):
                     next(args_iter, None)
             else:
-                return True
-        return False
+                unknown_args.append(arg)
+        return unknown_args
 
     def __init__(self, executable: str) -> None:
         self.executable = executable

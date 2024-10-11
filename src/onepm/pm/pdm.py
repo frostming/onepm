@@ -19,7 +19,7 @@ class PDM(PackageManager):
         return "pdm" in pyproject.get("tool", {})
 
     def install(self, *args: str) -> NoReturn:
-        if self.has_unknown_args(args, ["p", "project", "G", "group", "L", "lockfile"]):
+        if self.get_unknown_args(args, ["p", "project", "G", "group", "L", "lockfile"]):
             command = "add"
         else:
             command = "install"

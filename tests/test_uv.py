@@ -8,43 +8,36 @@ pytestmark = pytest.mark.usefixtures("uv")
 
 
 @pytest.mark.parametrize(
-    "args", [[], ["--dry-run"], ["--extra-index-url", "http://example.org"]]
+    "args", [[], ["--no-dev"], ["--extra-index-url", "http://example.org"]]
 )
 def test_uv_pi_sync(project, execute_command, args):
     pi(args)
-    execute_command.assert_called_with(
-        ["uv", "pip", "sync", *args, "pyproject.toml"], mock.ANY, exit=True
-    )
+    execute_command.assert_called_with(["uv", "sync", *args], mock.ANY, exit=True)
 
 
 @pytest.mark.parametrize(
-    "args", [["requests"], ["--extra-index-url", "http://example.org", "requests"]]
+    "args",
+    [
+        ["requests"],
+        ["--extra-index-url", "http://example.org", "requests"],
+        ["-r", "requirements.txt"],
+    ],
 )
 def test_uv_pi_install(project, execute_command, args):
     pi(args)
-    execute_command.assert_called_with(
-        ["uv", "pip", "install", *args], mock.ANY, exit=True
-    )
+    execute_command.assert_called_with(["uv", "add", *args], mock.ANY, exit=True)
 
 
 def test_uv_pu(project, execute_command):
     pu([])
-    execute_command.assert_any_call(
-        ["uv", "pip", "compile", "-o", "requirements.lock", "pyproject.toml"],
-        mock.ANY,
-        exit=False,
-    )
-    execute_command.assert_any_call(
-        ["uv", "pip", "sync", "requirements.lock"],
-        mock.ANY,
-        exit=True,
-    )
+    execute_command.assert_any_call(["uv", "lock", "--upgrade"], mock.ANY, exit=False)
+    execute_command.assert_any_call(["uv", "sync"], mock.ANY, exit=True)
 
 
 def test_uv_pun(project, execute_command):
     pun(["requests"])
     execute_command.assert_called_with(
-        ["uv", "pip", "uninstall", "requests"], mock.ANY, exit=True
+        ["uv", "remove", "requests"], mock.ANY, exit=True
     )
 
 
